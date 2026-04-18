@@ -1,0 +1,7 @@
+April 2, 2026
+Asha: Welcome everyone. Today we need to finalize the student workshop agenda.
+Rahul: The introduction should explain why audio analytics helps classroom collaboration.
+Asha: We agreed to keep the demo simple and use prerecorded meetings for reliability.
+Meera: I will prepare the slides by Friday.
+Rahul: I will share the dataset notes by Thursday.
+Asha: Great, we decided to present the dashboard after the summary section.

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ title }}</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      margin: 32px;
+      line-height: 1.5;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+    h1, h2 {
+      color: #1e3a8a;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #e2e8f0;
+    }
+    .tags span {
+      display: inline-block;
+      margin: 0 8px 8px 0;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #ccfbf1;
+      color: #155e75;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>{{ title }}</h1>
+    <p>{{ summary }}</p>
+  </div>
+
+  <div class="card">
+    <h2>Participants</h2>
+    <div class="tags">
+      {% for participant in participants %}
+      <span>{{ participant }}</span>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Discussion Points</h2>
+    <ul>
+      {% for point in discussion_points %}
+      <li>{{ point }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Decisions</h2>
+    <ul>
+      {% for decision in decisions %}
+      <li>{{ decision }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  {% if risks %}
+  <div class="card">
+    <h2>Risks</h2>
+    <ul>
+      {% for risk in risks %}
+      <li>{{ risk }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <h2>Action Items</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th>Owner</th>
+          <th>Deadline</th>
+          <th>Status</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in action_items %}
+        <tr>
+          <td>{{ item.task }}</td>
+          <td>{{ item.owner }}</td>
+          <td>{{ item.deadline }}</td>
+          <td>{{ item.status }}</td>
+          <td>{{ item.notes }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Speaker Activity</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Speaker</th>
+          <th>Speaking Time</th>
+          <th>Share</th>
+          <th>Segments</th>
+          <th>Words</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in speaker_stats %}
+        <tr>
+          <td>{{ row.speaker }}</td>
+          <td>{{ row.speaking_time }}</td>
+          <td>{{ row.share_percent }}%</td>
+          <td>{{ row.segments }}</td>
+          <td>{{ row.words }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

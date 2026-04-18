@@ -1,0 +1,12 @@
+.pytest_cache/
+__pycache__/
+.venv/
+*.pyc
+*.pyo
+*.pyd
+*.wav
+*.mp3
+*.log
+build/
+dist/
+temp/

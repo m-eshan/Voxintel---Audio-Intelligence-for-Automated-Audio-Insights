@@ -1,0 +1,5 @@
+Host: Today we reviewed the semester feedback results.
+Faculty Lead: Students responded positively to shorter meetings and visual summaries.
+Host: We agreed that the current dashboard layout is easy to follow.
+Faculty Lead: The summary section should remain at the top because it saves time.
+Host: No further tasks were assigned in this session.

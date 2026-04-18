@@ -1,0 +1,6 @@
+Professor Iyer: Good morning team. Our classroom pilot needs a clean way to review group discussions.
+Anika: Students often miss the key decisions because the recordings are long.
+Professor Iyer: We agreed that VoxIntel should highlight discussion points and action items.
+Dev: I will collect two more meeting recordings by next Monday.
+Anika: I will test readability with the student council by Tuesday.
+Professor Iyer: The final presentation should connect the project to SDG 4.
