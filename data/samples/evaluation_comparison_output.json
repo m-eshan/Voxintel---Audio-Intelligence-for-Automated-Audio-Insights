@@ -1,0 +1,269 @@
+{
+  "ground_truth": {
+    "audio_file": "test_meeting_3speakers.mp3",
+    "total_duration": 49.97,
+    "speakers": [
+      "Sarah",
+      "George",
+      "Ravi"
+    ],
+    "segments": [
+      {
+        "segment_id": 1,
+        "speaker": "Sarah",
+        "voice": "en-US-JennyNeural",
+        "start": 0.0,
+        "end": 7.8,
+        "duration": 7.8,
+        "text": "Good morning team. Let's do our release readiness review. What is the status of the authentication bug?"
+      },
+      {
+        "segment_id": 2,
+        "speaker": "George",
+        "voice": "en-US-GuyNeural",
+        "start": 7.8,
+        "end": 15.41,
+        "duration": 7.61,
+        "text": "I've been looking into it. Users are experiencing login failures due to an expired token management issue."
+      },
+      {
+        "segment_id": 3,
+        "speaker": "Ravi",
+        "voice": "en-GB-RyanNeural",
+        "start": 15.41,
+        "end": 23.64,
+        "duration": 8.23,
+        "text": "I confirmed the issue during QA testing. We have a temporary workaround, but the permanent fix will take two days."
+      },
+      {
+        "segment_id": 4,
+        "speaker": "George",
+        "voice": "en-US-GuyNeural",
+        "start": 23.64,
+        "end": 29.02,
+        "duration": 5.38,
+        "text": "I'll take ownership of the permanent login patch and complete it by Friday at 5 PM."
+      },
+      {
+        "segment_id": 5,
+        "speaker": "Sarah",
+        "voice": "en-US-JennyNeural",
+        "start": 29.02,
+        "end": 36.53,
+        "duration": 7.51,
+        "text": "Approved. We decide to deploy the temporary workaround today, and George will release the permanent patch Friday."
+      },
+      {
+        "segment_id": 6,
+        "speaker": "Ravi",
+        "voice": "en-GB-RyanNeural",
+        "start": 36.53,
+        "end": 41.64,
+        "duration": 5.11,
+        "text": "I will notify the customer support team about the known issue by 2 PM today."
+      },
+      {
+        "segment_id": 7,
+        "speaker": "Sarah",
+        "voice": "en-US-JennyNeural",
+        "start": 41.64,
+        "end": 49.97,
+        "duration": 8.33,
+        "text": "Excellent. Ravi handles support notifications, George patches login by Friday. Let's wrap up."
+      }
+    ],
+    "ground_truth_mom": {
+      "decisions": [
+        "Deploy the temporary authentication workaround today",
+        "Release the permanent login patch on Friday"
+      ],
+      "action_items": [
+        {
+          "speaker": "George",
+          "task": "Take ownership of the permanent login patch and complete it",
+          "deadline": "Friday at 5 PM"
+        },
+        {
+          "speaker": "Ravi",
+          "task": "Notify the customer support team about the known issue",
+          "deadline": "2 PM today"
+        }
+      ]
+    }
+  },
+  "fast_mode": {
+    "summary": "Good morning, team Let's do our release readiness review What is the status of the authentication bug? I've been looking into it Users are experiencing login failures due to an expired token management issue I confirmed the issue during QA testing. We have a temporary workaround, but the permanent fix will take two days I'll take ownership of the permanent login patch and complete it by Friday at 5 PM. Approved.",
+    "action_items": [
+      {
+        "task": "Take ownership of the permanent login patch and complete it",
+        "person": "Speaker 3",
+        "deadline": "Friday at 5 PM",
+        "time": "00:23",
+        "notes": "[00:23] Speaker 3",
+        "confidence": 0.8
+      },
+      {
+        "task": "Deploy the temporary workaround today, and George will release the permanent patch Friday",
+        "person": "Unassigned",
+        "deadline": "today",
+        "time": "00:28",
+        "notes": "[00:28] Unassigned",
+        "confidence": 0.9
+      },
+      {
+        "task": "Notify the customer support team about the known issue",
+        "person": "Speaker 1",
+        "deadline": "2 PM",
+        "time": "00:36",
+        "notes": "[00:36] Speaker 1",
+        "confidence": 0.95
+      }
+    ],
+    "segments": [
+      {
+        "id": "whisper-1",
+        "speaker": "Speaker 2",
+        "start": 0.0,
+        "end": 7.0,
+        "text": "Good morning, team. Let's do our release readiness review. What is the status of the authentication bug?"
+      },
+      {
+        "id": "whisper-2",
+        "speaker": "Speaker 3",
+        "start": 7.0,
+        "end": 15.0,
+        "text": "I've been looking into it. Users are experiencing login failures due to an expired token management issue."
+      },
+      {
+        "id": "whisper-3",
+        "speaker": "Speaker 1",
+        "start": 15.0,
+        "end": 23.0,
+        "text": "I confirmed the issue during QA testing. We have a temporary workaround, but the permanent fix will take two days."
+      },
+      {
+        "id": "whisper-4",
+        "speaker": "Speaker 3",
+        "start": 23.0,
+        "end": 28.0,
+        "text": "I'll take ownership of the permanent login patch and complete it by Friday at 5 p.m."
+      },
+      {
+        "id": "whisper-5",
+        "speaker": "Speaker 2",
+        "start": 28.0,
+        "end": 36.0,
+        "text": "Approved. We decide to deploy the temporary workaround today, and George will release the permanent patch Friday."
+      },
+      {
+        "id": "whisper-6",
+        "speaker": "Speaker 1",
+        "start": 36.0,
+        "end": 41.0,
+        "text": "I will notify the customer support team about the known issue by 2 p.m. today."
+      },
+      {
+        "id": "whisper-7",
+        "speaker": "Speaker 2",
+        "start": 41.0,
+        "end": 49.0,
+        "text": "Excellent. Robbie handles support notification. George patches login by Friday. Let's wrap up."
+      }
+    ]
+  },
+  "clustering_accuracy": {
+    "turn_purity_percent": 100.0,
+    "mapping": {
+      "Speaker 2": "Sarah",
+      "Speaker 1": "Ravi",
+      "Speaker 3": "George"
+    },
+    "segment_eval": [
+      {
+        "whisper_time": "0.0s - 7.0s",
+        "whisper_text": "Good morning, team. Let's do our re...",
+        "assigned_cluster": "Speaker 2",
+        "true_speaker": "Sarah"
+      },
+      {
+        "whisper_time": "7.0s - 15.0s",
+        "whisper_text": "I've been looking into it. Users ar...",
+        "assigned_cluster": "Speaker 3",
+        "true_speaker": "George"
+      },
+      {
+        "whisper_time": "15.0s - 23.0s",
+        "whisper_text": "I confirmed the issue during QA tes...",
+        "assigned_cluster": "Speaker 1",
+        "true_speaker": "Ravi"
+      },
+      {
+        "whisper_time": "23.0s - 28.0s",
+        "whisper_text": "I'll take ownership of the permanen...",
+        "assigned_cluster": "Speaker 3",
+        "true_speaker": "George"
+      },
+      {
+        "whisper_time": "28.0s - 36.0s",
+        "whisper_text": "Approved. We decide to deploy the t...",
+        "assigned_cluster": "Speaker 2",
+        "true_speaker": "Sarah"
+      },
+      {
+        "whisper_time": "36.0s - 41.0s",
+        "whisper_text": "I will notify the customer support ...",
+        "assigned_cluster": "Speaker 1",
+        "true_speaker": "Ravi"
+      },
+      {
+        "whisper_time": "41.0s - 49.0s",
+        "whisper_text": "Excellent. Robbie handles support n...",
+        "assigned_cluster": "Speaker 2",
+        "true_speaker": "Sarah"
+      }
+    ]
+  },
+  "smart_mode": {
+    "participants": [
+      "Sarah",
+      "George",
+      "Ravi"
+    ],
+    "overview": "The executive team reviewed the authentication bug issue and the deployment plan for the temporary workaround. George committed to finalizing the permanent login patch by Friday at 5 p.m., while Sarah and Ravi were assigned to handle support notification and ensure timely communication with the customer support team. The team approved the deployment of the temporary workaround today and George will release the permanent patch Friday.",
+    "discussion_points": [
+      "[00:07] Speaker 3: Users are experiencing login failures due to an expired token management issue.",
+      "[00:15] Speaker 1: During QA testing, the issue was identified as a temporary workaround, but the permanent fix will take two days.",
+      "[00:23] Speaker 3: George will take ownership of the permanent login patch and complete it by Friday at 5 p.m.",
+      "[00:28] Speaker 2: Approved the deployment of the temporary workaround today and George will release the permanent patch Friday.",
+      "[00:36] Speaker 1: Sarah will notify the customer support team about the known issue by 2 p.m. today."
+    ],
+    "decisions": [
+      "[00:41] Approved the deployment of the temporary workaround today and George will release the permanent patch Friday."
+    ],
+    "action_items": [
+      {
+        "task": "Ensure timely communication with the customer support team regarding the known issue.",
+        "person": "Ravi",
+        "deadline": "Today",
+        "notes": "00:45",
+        "confidence": 0.9
+      },
+      {
+        "task": "Finalize the permanent login patch by Friday at 5 p.m.",
+        "person": "George",
+        "deadline": "Unknown",
+        "notes": "00:47",
+        "confidence": 0.9
+      }
+    ],
+    "risks": [
+      "Potential for increased support ticket volume during the patch deployment."
+    ],
+    "next_steps": [
+      "G",
+      "e",
+      "o"
+    ],
+    "title": "Release Readiness Review Meeting"
+  }
+}

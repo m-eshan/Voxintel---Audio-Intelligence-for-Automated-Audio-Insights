@@ -10,7 +10,7 @@ from .exports import render_mom_html, render_mom_pdf
 from .optimized_pipeline import OptimizedPipelineError, run_optimized_voxintel
 
 DEFAULT_OLLAMA_HOST = "http://127.0.0.1:11434"
-DEFAULT_OLLAMA_MODEL = "phi:latest"  # Default to Phi for lightweight polishing
+DEFAULT_OLLAMA_MODEL = "llama3.2:3b"
 
 
 class OllamaPolishError(RuntimeError):
@@ -28,7 +28,7 @@ def _get_ollama_settings() -> tuple[str, str]:
         with request.urlopen(req, timeout=1.5) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             installed = [m.get("name", "") for m in data.get("models", [])]
-            for candidate in ["llama3.2:3b", "llama3.2", "phi3", "phi:latest", "mistral", "qwen"]:
+            for candidate in ["llama3.2:3b", "llama3.2", "gemma3:1b", "gemma3", "gemma2", "qwen2.5:0.5b", "qwen2.5", "phi3", "phi:latest", "mistral"]:
                 for inst in installed:
                     if candidate in inst:
                         return host, inst
@@ -62,41 +62,43 @@ def _build_prompt(base_results: dict, attendees: list[str] | None = None) -> str
 
     return (
         "You are an executive meeting secretary. Write professional Minutes of Meeting (MoM) in THIRD PERSON, past tense.\n\n"
-        "STRICT INSTRUCTIONS:\n"
+        "TRANSCRIPT WITH TIMESTAMPS:\n"
+        f"{transcript}\n\n"
+        "INSTRUCTIONS:\n"
         "1. Never use first-person pronouns (I, we, our, me, us). Always refer to speakers by name or 'Speaker N'.\n"
         "2. Write in formal past tense (e.g. 'George committed to...', 'The team approved...').\n"
-        "3. Every discussion point and decision must cite the timestamp (mm:ss) from the transcript.\n"
+        "3. Every discussion point, decision, and action item must cite the timestamp (mm:ss) from the transcript.\n"
         f"4. Action item owners MUST be chosen from this attendee list: [{attendee_list_str}]. If unassigned or unknown, use 'Unassigned'.\n"
-        "5. Output valid JSON strictly conforming to this schema:\n\n"
+        "5. Extract ALL explicit tasks, commitments, and deliverables into action_items.\n"
+        "6. Keep output concise: 2-3 sentences summary, 2-3 discussion points, 1-2 decisions, and all explicit action items.\n\n"
+        "Respond ONLY with a valid JSON object matching this schema:\n"
         "{\n"
-        '  "title": "Concise Descriptive Meeting Title",\n'
-        '  "summary": "2-4 sentence executive summary strictly in third person past tense.",\n'
-        '  "discussion_points": [{"time": "mm:ss", "speaker": "Name or Speaker", "point": "Concise summary of topic"}],\n'
-        '  "decisions": [{"time": "mm:ss", "speaker": "Name or Speaker", "decision": "Agreed decision"}],\n'
-        '  "action_items": [{"time": "mm:ss", "owner": "Name from attendees or Unassigned", "task": "Specific task", "deadline": "Deadline or Not specified"}],\n'
-        '  "risks": ["Identified risk or blocker"],\n'
+        '  "title": "Meeting Title",\n'
+        '  "summary": "2 to 4 sentence executive summary strictly in third person past tense.",\n'
+        '  "discussion_points": [{"time": "mm:ss", "speaker": "Speaker Name", "point": "Concise summary of topic"}],\n'
+        '  "decisions": [{"time": "mm:ss", "speaker": "Speaker Name", "decision": "Agreed decision"}],\n'
+        '  "action_items": [{"time": "mm:ss", "owner": "Attendee Name or Unassigned", "task": "Specific task", "deadline": "Deadline or Not specified"}],\n'
+        '  "risks": ["Key risk or blocker"],\n'
         '  "next_steps": ["Key next step"]\n'
-        "}\n\n"
-        f"TRANSCRIPT WITH TIMESTAMPS:\n{transcript}\n\n"
-        "Generate the JSON MoM now:"
+        "}\n"
     )
 
 
 def _parse_sectioned_response(content: str) -> dict:
     cleaned = content.strip()
 
-    # Try parsing JSON first
+    # Extract JSON substring between first { and last }
+    first_brace = cleaned.find("{")
+    last_brace = cleaned.rfind("}")
     json_candidate = cleaned
-    if "```json" in json_candidate:
-        match = re.search(r"```json\s*(\{.*?\})\s*```", json_candidate, re.DOTALL)
+    if first_brace != -1 and last_brace > first_brace:
+        json_candidate = cleaned[first_brace : last_brace + 1].strip()
+    elif "```json" in cleaned:
+        match = re.search(r"```json\s*(\{.*?\})\s*```", cleaned, re.DOTALL)
         if match:
             json_candidate = match.group(1).strip()
-    elif "```" in json_candidate:
-        match = re.search(r"```\s*(\{.*?\})\s*```", json_candidate, re.DOTALL)
-        if match:
-            json_candidate = match.group(1).strip()
-    elif "{" in json_candidate and "}" in json_candidate:
-        match = re.search(r"(\{.*\})", json_candidate, re.DOTALL)
+    elif "```" in cleaned:
+        match = re.search(r"```\s*(\{.*?\})\s*```", cleaned, re.DOTALL)
         if match:
             json_candidate = match.group(1).strip()
 
@@ -109,25 +111,32 @@ def _parse_sectioned_response(content: str) -> dict:
                 if isinstance(d, dict):
                     time_str = f"[{d['time']}] " if d.get("time") else ""
                     spk_str = f"{d['speaker']}: " if d.get("speaker") else ""
-                    discussion.append(f"{time_str}{spk_str}{d.get('point', '')}".strip())
-                elif isinstance(d, str):
-                    discussion.append(d)
+                    point_str = d.get("point") or d.get("decision") or d.get("text") or ""
+                    if point_str.strip():
+                        discussion.append(f"{time_str}{spk_str}{point_str}".strip())
+                elif isinstance(d, str) and d.strip():
+                    discussion.append(d.strip())
 
             raw_dec = data.get("decisions", [])
             decisions = []
             for d in raw_dec:
                 if isinstance(d, dict):
                     time_str = f"[{d['time']}] " if d.get("time") else ""
-                    decisions.append(f"{time_str}{d.get('decision', '')}".strip())
-                elif isinstance(d, str):
-                    decisions.append(d)
+                    dec_str = d.get("decision") or d.get("point") or d.get("text") or ""
+                    if dec_str.strip():
+                        decisions.append(f"{time_str}{dec_str}".strip())
+                elif isinstance(d, str) and d.strip():
+                    decisions.append(d.strip())
 
             raw_actions = data.get("action_items", [])
             action_items = []
             for a in raw_actions:
                 if isinstance(a, dict):
+                    task_str = a.get("task") or a.get("item") or ""
+                    if not task_str or task_str.lower() in {"unassigned", "unknown", "none"}:
+                        continue
                     action_items.append({
-                        "task": a.get("task", "Unknown"),
+                        "task": task_str,
                         "owner": a.get("owner", a.get("person", "Unassigned")),
                         "deadline": a.get("deadline", "Unknown"),
                         "notes": a.get("time", ""),
@@ -313,7 +322,7 @@ def _call_ollama(prompt: str, confidence_threshold: float = None, attendees: lis
         "model": model,
         "prompt": prompt,
         "stream": False,
-        "options": {"temperature": 0.1, "num_predict": 450, "top_p": 0.9},
+        "options": {"temperature": 0.1, "num_predict": 1200, "top_p": 0.9},
     }
 
     req = request.Request(

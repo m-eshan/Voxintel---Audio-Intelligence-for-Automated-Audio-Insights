@@ -214,9 +214,13 @@ def cluster_speech_segments(
             rms = librosa.feature.rms(y=clip)
             zero_cross = librosa.feature.zero_crossing_rate(y=clip)
             spec_cent = librosa.feature.spectral_centroid(y=clip, sr=sr)
+            f0 = librosa.yin(clip, fmin=75, fmax=350, sr=sr, hop_length=512)
+            f0_valid = f0[np.isfinite(f0)]
+            pitch = float(np.median(f0_valid)) if f0_valid.size else 120.0
+
             feat = np.concatenate([
                 np.mean(mfcc, axis=1),
-                [float(np.mean(rms)), float(np.mean(zero_cross)), float(np.mean(spec_cent))]
+                [float(np.mean(rms)), float(np.mean(zero_cross)), float(np.mean(spec_cent)), pitch]
             ])
             feature_rows.append(feat)
             usable_indices.append(idx)
@@ -228,7 +232,8 @@ def cluster_speech_segments(
             s["speaker"] = s.get("speaker") or "Speaker 1"
         return segments
 
-    feature_matrix = np.vstack(feature_rows)
+    from sklearn.preprocessing import StandardScaler
+    feature_matrix = StandardScaler().fit_transform(np.vstack(feature_rows))
     num_samples = len(feature_rows)
 
     best_labels = None
@@ -304,7 +309,7 @@ def run_optimized_voxintel(audio_file: str | Path, progress_callback=None, atten
         cleaned_text, sentences, tokens = clean_transcript(transcript)
         keyword_df = extract_keywords(cleaned_text)
         summary, _ = generate_summary(sentences, tokens, transcript=cleaned_text, method="rule_based")
-        mom = generate_mom(transcript, summary, attendees=attendees)
+        mom = generate_mom(transcript, summary, attendees=attendees, segments=segments)
         action_items = pd.DataFrame(mom["action_items"])
 
         # Compute speaker activity metrics

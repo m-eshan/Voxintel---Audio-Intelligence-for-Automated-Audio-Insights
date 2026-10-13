@@ -206,7 +206,7 @@ def process_meeting_audio(
             )
             cleaned_text, sentences, tokens = clean_transcript(base_results["transcript"])
             summary, _ = generate_summary(sentences, tokens, transcript=cleaned_text, method="rule_based")
-            mom = generate_mom(base_results["transcript"], summary, attendees=attendees)
+            mom = generate_mom(base_results["transcript"], summary, attendees=attendees, segments=base_results.get("segments"))
             base_results["summary"] = summary
             base_results["mom"] = {
                 **mom,
@@ -221,7 +221,7 @@ def process_meeting_audio(
     else:
         cleaned_text, sentences, tokens = clean_transcript(base_results["transcript"])
         summary, _ = generate_summary(sentences, tokens, transcript=cleaned_text, method="rule_based")
-        mom = generate_mom(base_results["transcript"], summary, attendees=attendees)
+        mom = generate_mom(base_results["transcript"], summary, attendees=attendees, segments=base_results.get("segments"))
         base_results["summary"] = summary
         base_results["mom"] = {
             **mom,

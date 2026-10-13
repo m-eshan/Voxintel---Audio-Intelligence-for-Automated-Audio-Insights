@@ -1,0 +1,92 @@
+{
+  "audio_file": "test_meeting_3speakers.mp3",
+  "total_duration": 49.97,
+  "speakers": [
+    "Sarah",
+    "George",
+    "Ravi"
+  ],
+  "segments": [
+    {
+      "segment_id": 1,
+      "speaker": "Sarah",
+      "voice": "en-US-JennyNeural",
+      "start": 0.0,
+      "end": 7.8,
+      "duration": 7.8,
+      "text": "Good morning team. Let's do our release readiness review. What is the status of the authentication bug?"
+    },
+    {
+      "segment_id": 2,
+      "speaker": "George",
+      "voice": "en-US-GuyNeural",
+      "start": 7.8,
+      "end": 15.41,
+      "duration": 7.61,
+      "text": "I've been looking into it. Users are experiencing login failures due to an expired token management issue."
+    },
+    {
+      "segment_id": 3,
+      "speaker": "Ravi",
+      "voice": "en-GB-RyanNeural",
+      "start": 15.41,
+      "end": 23.64,
+      "duration": 8.23,
+      "text": "I confirmed the issue during QA testing. We have a temporary workaround, but the permanent fix will take two days."
+    },
+    {
+      "segment_id": 4,
+      "speaker": "George",
+      "voice": "en-US-GuyNeural",
+      "start": 23.64,
+      "end": 29.02,
+      "duration": 5.38,
+      "text": "I'll take ownership of the permanent login patch and complete it by Friday at 5 PM."
+    },
+    {
+      "segment_id": 5,
+      "speaker": "Sarah",
+      "voice": "en-US-JennyNeural",
+      "start": 29.02,
+      "end": 36.53,
+      "duration": 7.51,
+      "text": "Approved. We decide to deploy the temporary workaround today, and George will release the permanent patch Friday."
+    },
+    {
+      "segment_id": 6,
+      "speaker": "Ravi",
+      "voice": "en-GB-RyanNeural",
+      "start": 36.53,
+      "end": 41.64,
+      "duration": 5.11,
+      "text": "I will notify the customer support team about the known issue by 2 PM today."
+    },
+    {
+      "segment_id": 7,
+      "speaker": "Sarah",
+      "voice": "en-US-JennyNeural",
+      "start": 41.64,
+      "end": 49.97,
+      "duration": 8.33,
+      "text": "Excellent. Ravi handles support notifications, George patches login by Friday. Let's wrap up."
+    }
+  ],
+  "ground_truth_mom": {
+    "decisions": [
+      "Deploy the temporary authentication workaround today",
+      "Release the permanent login patch on Friday"
+    ],
+    "action_items": [
+      {
+        "speaker": "George",
+        "task": "Take ownership of the permanent login patch and complete it",
+        "deadline": "Friday at 5 PM"
+      },
+      {
+        "speaker": "Ravi",
+        "task": "Notify the customer support team about the known issue",
+        "deadline": "2 PM today"
+      }
+    ]
+  }
+}

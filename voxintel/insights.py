@@ -10,13 +10,13 @@ from .nlp import clean_sentences, clean_transcript, split_sentences, tokenize
 
 ACTION_PATTERNS = [
     re.compile(
-        r"(?i)^(?P<person>[A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+(?:will|should|needs to|is going to)\s+(?P<task>.+?)(?:\s+by\s+(?P<deadline>[^.]+))?[.]?$"
+        r"(?i)^(?P<person>[A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+(?:will|should|needs to|is going to|to)\s+(?P<task>.+?)(?:\s+(?:by|before|on)\s+(?P<deadline>[^.]+?))?[.]?$"
     ),
     re.compile(
-        r"(?i)^(?:i|we)\s+(?:will|should|need to|are going to)\s+(?P<task>.+?)(?:\s+by\s+(?P<deadline>[^.]+))?[.]?$"
+        r"(?i)^(?:i'll|i\s+will|we'll|we\s+will|i\s+can|we\s+can|i\s+should|i\s+need\s+to|we\s+need\s+to|i\s+am\s+going\s+to|we\s+are\s+going\s+to)\s+(?P<task>.+?)(?:\s+(?:by|before|on)\s+(?P<deadline>[^.]+?))?[.]?$"
     ),
     re.compile(
-        r"(?i)^action item[:\-]?\s*(?P<person>[A-Z][a-z]+)?\s*(?:will|should|needs to)?\s*(?P<task>.+?)(?:\s+by\s+(?P<deadline>[^.]+))?[.]?$"
+        r"(?i)^action item[:\-]?\s*(?P<person>[A-Z][a-z]+)?\s*(?:will|should|needs to)?\s*(?P<task>.+?)(?:\s+(?:by|before|on)\s+(?P<deadline>[^.]+?))?[.]?$"
     ),
 ]
 
@@ -33,7 +33,9 @@ FULL_NAME_PATTERN = re.compile(r"\b([A-Z][a-z]+ [A-Z][a-z]+)\b")
 TOPIC_CUE_PATTERN = re.compile(
     r"(?i)\b(issue|issues|bug|bugs|authentication|ui|design|release|timeline|deadline|demo|support|testing|review|fix|plan|notes|documentation)\b"
 )
-DEADLINE_PATTERN = re.compile(r"(?i)\b(by tomorrow|tomorrow|next week|next month|this week|today|by [A-Z][a-z]+day)\b")
+DEADLINE_PATTERN = re.compile(
+    r"(?i)\b(by tomorrow|tomorrow|next week|next month|this week|today|by [A-Z][a-z]+day(?:\s+at\s+\d{1,2}(?::\d{2})?\s*(?:AM|PM))?|\d{1,2}(?::\d{2})?\s*(?:AM|PM)(?:\s+today)?)\b"
+)
 WEAK_ACTION_PATTERN = re.compile(r"(?i)\b(we'?ll try|we'?ll ensure|sounds good|good idea|good point|maybe|should discuss|let'?s discuss)\b")
 VAGUE_DECISION_PATTERN = re.compile(r"(?i)\b(maybe|might|should|let'?s discuss|perhaps|could)\b")
 COMMON_FIRST_NAMES = {
@@ -190,7 +192,22 @@ def generate_summary(
     return _generate_rule_based_summary(sentences, tokens), "rule_based"
 
 
-def extract_action_items(sentences: list[str], attendees: list[str] | None = None) -> list[dict[str, str]]:
+def _find_segment_for_sentence(sentence: str, segments: list[dict] | None) -> dict | None:
+    if not segments:
+        return None
+    s_clean = re.sub(r"[^a-z0-9]", "", sentence.lower())
+    for seg in segments:
+        seg_clean = re.sub(r"[^a-z0-9]", "", (seg.get("text") or "").lower())
+        if s_clean in seg_clean or seg_clean in s_clean:
+            return seg
+    return None
+
+
+def extract_action_items(
+    sentences: list[str],
+    attendees: list[str] | None = None,
+    segments: list[dict] | None = None,
+) -> list[dict[str, str]]:
     action_items: list[dict[str, str]] = []
     attendee_set = {a.lower().strip() for a in attendees} if attendees else set()
     invalid_person_words = {"the", "this", "that", "it", "there", "we", "our", "all", "each", "both", "login", "the login"}
@@ -202,7 +219,7 @@ def extract_action_items(sentences: list[str], attendees: list[str] | None = Non
         if len(stripped.split()) > 24:
             continue
         matched_rule = False
-        for pattern in ACTION_PATTERNS:
+        for pattern_idx, pattern in enumerate(ACTION_PATTERNS):
             match = pattern.match(stripped)
             if not match:
                 continue
@@ -213,30 +230,50 @@ def extract_action_items(sentences: list[str], attendees: list[str] | None = Non
                 continue
             matched_rule = True
             detected_person = (match.groupdict().get("person") or "").strip()
-            
-            # Filter non-person nouns and validate
+
+            # Find matching audio segment for speaker and timestamp attribution
+            matched_seg = _find_segment_for_sentence(stripped, segments)
+            seg_speaker = matched_seg.get("speaker") if matched_seg else None
+            seg_start = matched_seg.get("start") if matched_seg else None
+            time_str = f"{int(float(seg_start) // 60):02d}:{int(float(seg_start) % 60):02d}" if seg_start is not None else ""
+
             lower_person = detected_person.lower()
-            if lower_person in invalid_person_words or any(lower_person.startswith(inv + " ") for inv in ["the", "this", "that"]):
+            if pattern_idx == 1:
+                # Pattern 2: First-person ("I'll", "I will", "We'll")
+                if stripped.lower().startswith(("we'll", "we will", "we ")):
+                    detected_person = "Team"
+                else:
+                    # Attribution from the actual speaker of the segment
+                    if seg_speaker and seg_speaker != "Unknown":
+                        matched_att = next((att for att in (attendees or []) if att.lower() == seg_speaker.lower()), None)
+                        detected_person = matched_att if matched_att else seg_speaker
+                    else:
+                        detected_person = "Unassigned"
+            elif lower_person in invalid_person_words or any(lower_person.startswith(inv + " ") for inv in ["the", "this", "that"]):
                 detected_person = "Team"
-            elif attendee_set:
-                matched_att = next((att for att in attendees if att.lower() in lower_person or lower_person in att.lower()), None)
-                detected_person = matched_att if matched_att else "Unassigned"
-            elif not detected_person and stripped.lower().startswith("we "):
-                detected_person = "Team"
+            elif attendee_set and lower_person:
+                matched_att = next(
+                    (att for att in attendees if att.lower() == lower_person or att.lower() in lower_person or lower_person in att.lower()),
+                    None
+                )
+                detected_person = matched_att if matched_att else (detected_person if _validate_name(detected_person) else "Unassigned")
             elif detected_person and not _validate_name(detected_person) and lower_person not in {"team", "unassigned"}:
-                # If single word name that is capitalized, keep it (like Sarah, John)
                 if len(detected_person.split()) == 1 and detected_person[0].isupper():
                     pass
                 else:
                     detected_person = "Unassigned"
 
+            deadline = _extract_deadline(stripped, match.group("deadline"))
+            notes = f"[{time_str}] {detected_person}" if time_str else "Rule-based extraction"
+
             action_items.append(
                 {
                     "task": _clean_task(task),
-                    "person": detected_person or "Team",
-                    "deadline": _extract_deadline(stripped, match.group("deadline")),
-                    "notes": "Rule-based extraction",
-                    "confidence": _estimate_action_confidence(stripped, detected_person or "Team", match.group("deadline")),
+                    "person": detected_person or "Unassigned",
+                    "deadline": deadline,
+                    "time": time_str,
+                    "notes": notes,
+                    "confidence": _estimate_action_confidence(stripped, detected_person or "Unassigned", match.group("deadline")),
                 }
             )
             break
@@ -245,13 +282,19 @@ def extract_action_items(sentences: list[str], attendees: list[str] | None = Non
             trigger in stripped.lower() for trigger in ["follow up", "send", "prepare", "share", "complete"]
         ):
             if len(stripped.split()) <= 14 and not any(item["task"].lower() == stripped.lower().strip(" .") for item in action_items):
+                matched_seg = _find_segment_for_sentence(stripped, segments)
+                seg_speaker = matched_seg.get("speaker") if matched_seg else None
+                seg_start = matched_seg.get("start") if matched_seg else None
+                time_str = f"{int(float(seg_start) // 60):02d}:{int(float(seg_start) % 60):02d}" if seg_start is not None else ""
+                person = seg_speaker if (seg_speaker and seg_speaker != "Unknown") else "Team"
                 action_items.append(
                     {
                         "task": _clean_task(stripped.strip(" .")),
-                        "person": "Team",
+                        "person": person,
                         "deadline": _extract_deadline(stripped, None),
-                        "notes": "Detected from action-oriented phrasing",
-                        "confidence": _estimate_action_confidence(stripped, "Team", None) - 0.15,
+                        "time": time_str,
+                        "notes": f"[{time_str}] {person}" if time_str else "Detected from action-oriented phrasing",
+                        "confidence": _estimate_action_confidence(stripped, person, None) - 0.15,
                     }
                 )
 
@@ -342,10 +385,15 @@ def _extract_decisions(sentences: list[str]) -> list[str]:
     return decisions[:3] or ["No explicit decisions were detected."]
 
 
-def generate_mom(transcript: str, summary: str, attendees: list[str] | None = None) -> dict:
+def generate_mom(
+    transcript: str,
+    summary: str,
+    attendees: list[str] | None = None,
+    segments: list[dict] | None = None,
+) -> dict:
     cleaned_text, sentences, tokens = clean_transcript(transcript)
     _ = tokens
-    action_items = extract_action_items(sentences, attendees=attendees)
+    action_items = extract_action_items(sentences, attendees=attendees, segments=segments)
     extracted_participants = _extract_participants(transcript)
     if attendees:
         final_participants = sorted(set(attendees) | set(extracted_participants))

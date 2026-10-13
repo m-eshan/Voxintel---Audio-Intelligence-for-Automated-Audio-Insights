@@ -210,7 +210,19 @@ def _heuristic_sentence_chunks(text: str) -> list[str]:
     return [chunk for chunk in chunks if chunk]
 
 
+def normalize_time_abbreviations(text: str) -> str:
+    """Normalize 'p.m.' / 'a.m.' and 'pm' / 'am' to 'PM' and 'AM'
+    so that periods in time references do not trigger false sentence splitting or break deadline regexes.
+    """
+    text = re.sub(r"(?i)\b(\d{1,2}(?::\d{2})?)\s*p\.m\.?\b", r"\1 PM", text)
+    text = re.sub(r"(?i)\b(\d{1,2}(?::\d{2})?)\s*a\.m\.?\b", r"\1 AM", text)
+    text = re.sub(r"(?i)\b(\d{1,2}(?::\d{2})?)\s*pm\b", r"\1 PM", text)
+    text = re.sub(r"(?i)\b(\d{1,2}(?::\d{2})?)\s*am\b", r"\1 AM", text)
+    return text
+
+
 def split_sentences(text: str) -> list[str]:
+    text = normalize_time_abbreviations(text)
     normalized = re.sub(r"\s+", " ", text.replace("\n", " ")).strip()
     if not normalized:
         return []
@@ -245,7 +257,7 @@ def clean_transcript(text: str) -> tuple[str, list[str], list[str]]:
     if not normalized:
         return "", [], []
 
-    cleaned = normalized
+    cleaned = normalize_time_abbreviations(normalized)
     for source, target in COMMON_FIXES.items():
         cleaned = re.sub(rf"\b{re.escape(source)}\b", target, cleaned, flags=re.IGNORECASE)
     for filler in sorted(FILLER_WORDS, key=len, reverse=True):
