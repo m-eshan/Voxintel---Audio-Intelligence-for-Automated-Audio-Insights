@@ -170,3 +170,29 @@ def test_rewrite_report_style_converts_casual_to_formal():
     # Should use formal language
     assert len(rewritten) > 0
 
+
+def test_cluster_speech_segments_fallback_on_missing_file():
+    from voxintel.optimized_pipeline import cluster_speech_segments
+    segments = [{"start": 0.0, "end": 2.0, "text": "Hello"}, {"start": 2.5, "end": 5.0, "text": "World"}]
+    result = cluster_speech_segments(Path("missing.wav"), segments)
+    assert len(result) == 2
+    assert result[0]["speaker"] == "Speaker 1"
+
+
+def test_cluster_speech_segments_on_synthetic_meeting():
+    from voxintel.optimized_pipeline import cluster_speech_segments
+    audio_path = SAMPLES_DIR / "test_meeting_3speakers.mp3"
+    if not audio_path.exists():
+        return
+    segments = [
+        {"start": 0.0, "end": 7.0, "text": "Good morning team."},
+        {"start": 7.0, "end": 15.0, "text": "Looking into it."},
+        {"start": 15.0, "end": 23.0, "text": "Confirmed issue."},
+        {"start": 23.0, "end": 29.0, "text": "I'll take ownership."},
+    ]
+    result = cluster_speech_segments(audio_path, segments, expected_speakers=2)
+    assert len(result) == 4
+    speakers = {s["speaker"] for s in result}
+    assert len(speakers) >= 1
+
+

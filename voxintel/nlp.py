@@ -277,7 +277,13 @@ def extract_keywords(text_or_tokens: str | list[str], top_n: int = 10) -> pd.Dat
     if not windows:
         windows = [" ".join(filtered)]
 
-    all_stops = list(STOPWORDS | LOW_SIGNAL_WORDS | FILLER_WORDS)
+    all_stops = sorted(
+        {
+            re.sub(r"[^\w]", "", word.lower())
+            for word in (STOPWORDS | LOW_SIGNAL_WORDS | FILLER_WORDS)
+            if re.sub(r"[^\w]", "", word.lower())
+        }
+    )
     vectorizer = TfidfVectorizer(
         stop_words=all_stops,
         ngram_range=(1, 2),

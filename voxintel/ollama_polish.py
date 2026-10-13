@@ -19,43 +19,143 @@ class OllamaPolishError(RuntimeError):
 
 def _get_ollama_settings() -> tuple[str, str]:
     host = os.getenv("OLLAMA_HOST", DEFAULT_OLLAMA_HOST).rstrip("/")
-    model = os.getenv("OLLAMA_MODEL", "").strip() or DEFAULT_OLLAMA_MODEL
-    return host, model
+    env_model = os.getenv("OLLAMA_MODEL", "").strip()
+    if env_model:
+        return host, env_model
+
+    try:
+        req = request.Request(f"{host}/api/tags", headers={"Content-Type": "application/json"}, method="GET")
+        with request.urlopen(req, timeout=1.5) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            installed = [m.get("name", "") for m in data.get("models", [])]
+            for candidate in ["llama3.2:3b", "llama3.2", "phi3", "phi:latest", "mistral", "qwen"]:
+                for inst in installed:
+                    if candidate in inst:
+                        return host, inst
+            if installed:
+                return host, installed[0]
+    except Exception:
+        pass
+
+    return host, DEFAULT_OLLAMA_MODEL
 
 
-def _build_prompt(base_results: dict) -> str:
-    transcript = base_results["transcript"][:5000]  # Shorter for Phi
-    draft_summary = base_results.get("summary", "")
+def _build_prompt(base_results: dict, attendees: list[str] | None = None) -> str:
+    segments = base_results.get("segments", [])
+    if segments:
+        turns = []
+        for s in segments[:75]:
+            start_sec = int(s.get("start", 0))
+            mm = start_sec // 60
+            ss = start_sec % 60
+            spk = s.get("speaker", "Speaker")
+            text = s.get("text", "")
+            turns.append(f"[{mm:02d}:{ss:02d}] {spk}: {text}")
+        transcript = "\n".join(turns)
+    else:
+        transcript = base_results.get("transcript", "")[:4500]
+
     draft_mom = base_results.get("mom", {})
-    participants = draft_mom.get("participants", [])
+    if not attendees:
+        attendees = draft_mom.get("participants", [])
+    attendee_list_str = ", ".join(attendees) if attendees else "Unknown attendees"
 
-    # Simplified prompt for Phi model
     return (
-        "You are an expert meeting note writer. Rewrite this into a professional MoM.\n\n"
-        "OUTPUT FORMAT STRICTLY:\n"
-        "TITLE:\n"
-        "SUMMARY:\n"
-        "DISCUSSION POINTS:\n"
-        "DECISIONS:\n"
-        "ACTION ITEMS:\n"
-        "RISKS:\n"
-        "NEXT STEPS:\n\n"
-        "RULES:\n"
-        "- Use formal, third-person corporate language.\n"
-        "- No more than 3 consecutive words from transcript.\n"
-        "- Summary must be 2-4 sentences.\n"
-        "- Discussion: 3-5 points, max 32 words each.\n"
-        "- Decisions: only firm decisions (decided/agreed/approved/confirmed).\n"
-        "- Action Items: format 'Task | Owner | Deadline | High/Med/Low'\n"
-        "- Keep participant names when possible.\n\n"
-        f"Participants: {', '.join(participants) if participants else 'Unknown'}\n"
-        f"Draft summary: {draft_summary}\n"
-        f"Transcript snippet: {transcript}\n\n"
-        "Generate the final polished MoM strictly following the format."
+        "You are an executive meeting secretary. Write professional Minutes of Meeting (MoM) in THIRD PERSON, past tense.\n\n"
+        "STRICT INSTRUCTIONS:\n"
+        "1. Never use first-person pronouns (I, we, our, me, us). Always refer to speakers by name or 'Speaker N'.\n"
+        "2. Write in formal past tense (e.g. 'George committed to...', 'The team approved...').\n"
+        "3. Every discussion point and decision must cite the timestamp (mm:ss) from the transcript.\n"
+        f"4. Action item owners MUST be chosen from this attendee list: [{attendee_list_str}]. If unassigned or unknown, use 'Unassigned'.\n"
+        "5. Output valid JSON strictly conforming to this schema:\n\n"
+        "{\n"
+        '  "title": "Concise Descriptive Meeting Title",\n'
+        '  "summary": "2-4 sentence executive summary strictly in third person past tense.",\n'
+        '  "discussion_points": [{"time": "mm:ss", "speaker": "Name or Speaker", "point": "Concise summary of topic"}],\n'
+        '  "decisions": [{"time": "mm:ss", "speaker": "Name or Speaker", "decision": "Agreed decision"}],\n'
+        '  "action_items": [{"time": "mm:ss", "owner": "Name from attendees or Unassigned", "task": "Specific task", "deadline": "Deadline or Not specified"}],\n'
+        '  "risks": ["Identified risk or blocker"],\n'
+        '  "next_steps": ["Key next step"]\n'
+        "}\n\n"
+        f"TRANSCRIPT WITH TIMESTAMPS:\n{transcript}\n\n"
+        "Generate the JSON MoM now:"
     )
 
 
 def _parse_sectioned_response(content: str) -> dict:
+    cleaned = content.strip()
+
+    # Try parsing JSON first
+    json_candidate = cleaned
+    if "```json" in json_candidate:
+        match = re.search(r"```json\s*(\{.*?\})\s*```", json_candidate, re.DOTALL)
+        if match:
+            json_candidate = match.group(1).strip()
+    elif "```" in json_candidate:
+        match = re.search(r"```\s*(\{.*?\})\s*```", json_candidate, re.DOTALL)
+        if match:
+            json_candidate = match.group(1).strip()
+    elif "{" in json_candidate and "}" in json_candidate:
+        match = re.search(r"(\{.*\})", json_candidate, re.DOTALL)
+        if match:
+            json_candidate = match.group(1).strip()
+
+    try:
+        data = json.loads(json_candidate)
+        if isinstance(data, dict):
+            raw_disc = data.get("discussion_points", [])
+            discussion = []
+            for d in raw_disc:
+                if isinstance(d, dict):
+                    time_str = f"[{d['time']}] " if d.get("time") else ""
+                    spk_str = f"{d['speaker']}: " if d.get("speaker") else ""
+                    discussion.append(f"{time_str}{spk_str}{d.get('point', '')}".strip())
+                elif isinstance(d, str):
+                    discussion.append(d)
+
+            raw_dec = data.get("decisions", [])
+            decisions = []
+            for d in raw_dec:
+                if isinstance(d, dict):
+                    time_str = f"[{d['time']}] " if d.get("time") else ""
+                    decisions.append(f"{time_str}{d.get('decision', '')}".strip())
+                elif isinstance(d, str):
+                    decisions.append(d)
+
+            raw_actions = data.get("action_items", [])
+            action_items = []
+            for a in raw_actions:
+                if isinstance(a, dict):
+                    action_items.append({
+                        "task": a.get("task", "Unknown"),
+                        "owner": a.get("owner", a.get("person", "Unassigned")),
+                        "deadline": a.get("deadline", "Unknown"),
+                        "notes": a.get("time", ""),
+                        "confidence": float(a.get("confidence", 0.9)),
+                    })
+                elif isinstance(a, str):
+                    parts = [p.strip() for p in a.split("|")]
+                    action_items.append({
+                        "task": parts[0] if len(parts) > 0 else "Unknown",
+                        "owner": parts[1] if len(parts) > 1 else "Team",
+                        "deadline": parts[2] if len(parts) > 2 else "Unknown",
+                        "notes": "",
+                        "confidence": 0.85,
+                    })
+
+            return {
+                "title": data.get("title", "") or "VoxIntel Meeting Report",
+                "summary": data.get("summary", "") or data.get("overview", "") or "Executive meeting summary.",
+                "discussion_points": discussion[:5],
+                "decisions": decisions[:5],
+                "action_items": action_items[:5],
+                "risks": [r if isinstance(r, str) else str(r) for r in data.get("risks", [])][:3],
+                "next_steps": [n if isinstance(n, str) else str(n) for n in data.get("next_steps", [])][:3],
+            }
+    except Exception:
+        pass
+
+    # Fallback to plain text header parsing (TITLE:, SUMMARY:, etc.)
     aliases = {
         "title": "title",
         "summary": "summary",
@@ -87,7 +187,6 @@ def _parse_sectioned_response(content: str) -> dict:
     def parse_bullets(text: str) -> list[str]:
         return [l.strip().lstrip("-* ").strip() for l in text.splitlines() if l.strip()]
 
-    # Parse action items into structured dict
     action_items = []
     for line in parse_bullets("\n".join(sections["actions"]))[:5]:
         parts = [p.strip() for p in line.split("|")]
@@ -154,6 +253,7 @@ def _post_process_response(
     drop_generic_owners: bool = False,
     require_participant_names: bool = False,
     auto_fix_grammar: bool = False,
+    attendees: list[str] | None = None,
 ) -> dict:
     result = dict(parsed_response)
     # Polish title
@@ -176,17 +276,23 @@ def _post_process_response(
     filtered_actions = []
     num_filtered = 0
     quality_warnings = []
+    attendees_lower = [a.lower() for a in attendees] if attendees else []
 
     for item in raw_actions:
         conf = float(item.get("confidence", 0.7))
         owner = str(item.get("owner", "Team")).strip()
+
+        if attendees_lower and owner.lower() not in attendees_lower:
+            if owner.lower() in {"team", "unknown", "the login", "the", "it", "user", "users"} or drop_generic_owners:
+                item["owner"] = "Unassigned"
+                owner = "Unassigned"
 
         if conf < confidence_threshold:
             num_filtered += 1
             quality_warnings.append(f"Filtered low-confidence task ({conf:.2f} < {confidence_threshold:.2f}): {item.get('task')}")
             continue
 
-        if owner.lower() in {"team", "unknown"}:
+        if owner.lower() in {"team", "unknown", "unassigned"}:
             quality_warnings.append(f"Action item has generic owner '{owner}': {item.get('task')}")
 
         filtered_actions.append(item)
@@ -198,7 +304,7 @@ def _post_process_response(
     return result
 
 
-def _call_ollama(prompt: str, confidence_threshold: float = None) -> dict:
+def _call_ollama(prompt: str, confidence_threshold: float = None, attendees: list[str] | None = None) -> dict:
     if confidence_threshold is None:
         confidence_threshold = float(os.getenv("OLLAMA_CONFIDENCE_THRESHOLD", "0.60"))
 
@@ -207,7 +313,7 @@ def _call_ollama(prompt: str, confidence_threshold: float = None) -> dict:
         "model": model,
         "prompt": prompt,
         "stream": False,
-        "options": {"temperature": 0.2, "num_predict": 300, "top_p": 0.9},
+        "options": {"temperature": 0.1, "num_predict": 450, "top_p": 0.9},
     }
 
     req = request.Request(
@@ -218,43 +324,43 @@ def _call_ollama(prompt: str, confidence_threshold: float = None) -> dict:
     )
 
     try:
-        with request.urlopen(req, timeout=300) as resp:
+        with request.urlopen(req, timeout=120) as resp:
             raw = json.loads(resp.read().decode("utf-8"))
     except error.URLError as exc:
-        raise OllamaPolishError(f"Ollama not reachable at {host}") from exc
+        raise OllamaPolishError(
+            f"Ollama server is not reachable at {host}. "
+            f"Please ensure Ollama is running (`ollama serve` or Ollama app) or use Fast Mode."
+        ) from exc
+    except Exception as exc:
+        raise OllamaPolishError(f"Ollama generation failed: {exc}") from exc
 
     content = raw.get("response", "")
     if not content.strip():
         raise OllamaPolishError("Ollama returned empty response.")
 
     parsed = _parse_sectioned_response(content)
-    processed = _post_process_response(parsed, confidence_threshold=confidence_threshold)
+    processed = _post_process_response(parsed, confidence_threshold=confidence_threshold, attendees=attendees)
     return processed
 
 
-def polish_with_ollama(audio_path: str | Path, 
-                       progress_callback=None,
-                       confidence_threshold: float = None,
-                       attendees: list[str] | None = None) -> dict:
+def polish_results_with_ollama(
+    base_results: dict,
+    progress_callback=None,
+    confidence_threshold: float = None,
+    attendees: list[str] | None = None,
+) -> dict:
+    """Polish pre-computed transcription results using Ollama without re-transcribing."""
     if progress_callback:
-        progress_callback(20, "Running optimized transcription...")
+        progress_callback(75, "Polishing meeting notes with Ollama LLM...")
 
-    try:
-        base_results = run_optimized_voxintel(audio_path, progress_callback=progress_callback, attendees=attendees)
-    except OptimizedPipelineError as exc:
-        raise OllamaPolishError(str(exc)) from exc
-
-    if progress_callback:
-        progress_callback(70, "Polishing meeting notes with Ollama...")
-
-    payload = _call_ollama(_build_prompt(base_results), confidence_threshold=confidence_threshold)
+    prompt = _build_prompt(base_results, attendees=attendees)
+    payload = _call_ollama(prompt, confidence_threshold=confidence_threshold, attendees=attendees)
 
     if progress_callback:
-        progress_callback(100, "Polishing complete.")
+        progress_callback(95, "Rendering polished reports...")
 
-    # Step 3: Build polished MoM
     polished_mom = {
-        "participants": base_results["mom"].get("participants", ["Unknown"]),
+        "participants": attendees or base_results.get("mom", {}).get("participants", ["Unknown"]),
         "overview": payload.get("summary", base_results.get("summary", "")),
         "discussion_points": payload.get("discussion_points", []),
         "decisions": payload.get("decisions", []),
@@ -263,8 +369,8 @@ def polish_with_ollama(audio_path: str | Path,
                 "task": item["task"],
                 "person": item["owner"],
                 "deadline": item["deadline"],
-                "notes": item["notes"],
-                "confidence": item["confidence"],
+                "notes": item.get("notes", ""),
+                "confidence": item.get("confidence", 0.85),
             }
             for item in payload.get("action_items", [])
         ],
@@ -273,7 +379,6 @@ def polish_with_ollama(audio_path: str | Path,
         "title": payload.get("title", "VoxIntel Ollama Meeting Report"),
     }
 
-    # Step 4: Render reports
     report_context = {
         "title": polished_mom["title"],
         "summary": polished_mom["overview"],
@@ -292,7 +397,32 @@ def polish_with_ollama(audio_path: str | Path,
         ],
     }
 
+    base_results["summary"] = polished_mom["overview"]
+    base_results["summary_engine"] = "ollama-polish"
+    base_results["ollama_polish_used"] = True
     base_results["mom"] = polished_mom
     base_results["html_report"] = render_mom_html(report_context)
     base_results["pdf_report"] = render_mom_pdf(report_context)
     return base_results
+
+
+def polish_with_ollama(
+    audio_path: str | Path, 
+    progress_callback=None,
+    confidence_threshold: float = None,
+    attendees: list[str] | None = None,
+) -> dict:
+    if progress_callback:
+        progress_callback(20, "Running optimized transcription...")
+
+    try:
+        base_results = run_optimized_voxintel(audio_path, progress_callback=progress_callback, attendees=attendees)
+    except OptimizedPipelineError as exc:
+        raise OllamaPolishError(str(exc)) from exc
+
+    return polish_results_with_ollama(
+        base_results,
+        progress_callback=progress_callback,
+        confidence_threshold=confidence_threshold,
+        attendees=attendees,
+    )

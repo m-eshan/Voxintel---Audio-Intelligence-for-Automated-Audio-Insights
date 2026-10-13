@@ -1,5 +1,5 @@
-from __future__ import annotations
-
+import copy
+import hashlib
 import json
 import tempfile
 from pathlib import Path
@@ -13,7 +13,7 @@ from voxintel.insights import generate_mom, generate_summary, infer_speaker_acti
 from voxintel.local_hybrid_pipeline import LocalHybridPipelineError, analyze_local_hybrid_meeting
 from voxintel.nlp import clean_transcript, extract_keywords
 from voxintel.openai_pipeline import format_seconds
-from voxintel.ollama_polish import OllamaPolishError, polish_with_ollama
+from voxintel.ollama_polish import OllamaPolishError, polish_with_ollama, polish_results_with_ollama
 from voxintel.optimized_pipeline import OptimizedPipelineError, run_optimized_voxintel
 
 BASE_DIR = Path(__file__).parent
@@ -170,31 +170,74 @@ def build_hybrid_local_results(
     }
 
 
-def build_optimized_results(audio_path: Path, progress_bar, status_box, attendees: list[str] | None = None) -> dict:
+def process_meeting_audio(
+    audio_path: Path,
+    file_bytes: bytes,
+    source_label: str,
+    is_smart_mode: bool,
+    attendees: list[str] | None,
+    progress_bar,
+    status_box,
+) -> dict:
+    file_hash = hashlib.sha256(file_bytes).hexdigest()
+    audio_cache = st.session_state.get("audio_cache", {})
+
     def progress_callback(value: int, message: str) -> None:
         update_progress(progress_bar, status_box, value, message)
 
-    return run_optimized_voxintel(audio_path, progress_callback=progress_callback, attendees=attendees)
+    if file_hash in audio_cache:
+        update_progress(progress_bar, status_box, 30, f"Using cached Whisper transcription for {source_label}...")
+        base_results = copy.deepcopy(audio_cache[file_hash])
+    else:
+        update_progress(progress_bar, status_box, 20, f"Transcribing audio with faster-whisper base (int8)...")
+        base_results = run_optimized_voxintel(audio_path, progress_callback=progress_callback, attendees=attendees)
+        audio_cache[file_hash] = copy.deepcopy(base_results)
+        st.session_state["audio_cache"] = audio_cache
 
-
-def build_ollama_results(audio_path: Path, progress_bar, status_box, attendees: list[str] | None = None) -> dict:
-    def progress_callback(value: int, message: str) -> None:
-        update_progress(progress_bar, status_box, value, message)
-
-    try:
-        return polish_with_ollama(audio_path, progress_callback=progress_callback, attendees=attendees)
-    except OllamaPolishError as exc:
-        fallback = build_optimized_results(audio_path, progress_bar, status_box, attendees=attendees)
-        fallback["summary_engine"] = "ollama-polish"
-        fallback["ollama_polish_used"] = False
-        fallback["ollama_polish_error"] = str(exc)
-        return fallback
+    if is_smart_mode:
+        try:
+            update_progress(progress_bar, status_box, 75, "Synthesizing executive MoM with Ollama LLM...")
+            results = polish_results_with_ollama(base_results, progress_callback=progress_callback, attendees=attendees)
+            return results
+        except OllamaPolishError as exc:
+            status_box.warning(
+                f"⚠️ Local Ollama server is offline or unreachable: {exc}. "
+                "Switched cleanly to Fast Mode (TextRank). Start Ollama (`ollama serve`) to enable Smart Mode AI synthesis."
+            )
+            cleaned_text, sentences, tokens = clean_transcript(base_results["transcript"])
+            summary, _ = generate_summary(sentences, tokens, transcript=cleaned_text, method="rule_based")
+            mom = generate_mom(base_results["transcript"], summary, attendees=attendees)
+            base_results["summary"] = summary
+            base_results["mom"] = {
+                **mom,
+                "overview": summary,
+                "next_steps": [item["task"] for item in mom["action_items"][:4]],
+                "title": f"VoxIntel Meeting Report - {source_label}",
+            }
+            base_results["summary_engine"] = "ollama-fallback-fast"
+            base_results["ollama_polish_used"] = False
+            base_results["ollama_polish_error"] = str(exc)
+            return base_results
+    else:
+        cleaned_text, sentences, tokens = clean_transcript(base_results["transcript"])
+        summary, _ = generate_summary(sentences, tokens, transcript=cleaned_text, method="rule_based")
+        mom = generate_mom(base_results["transcript"], summary, attendees=attendees)
+        base_results["summary"] = summary
+        base_results["mom"] = {
+            **mom,
+            "overview": summary,
+            "next_steps": [item["task"] for item in mom["action_items"][:4]],
+            "title": f"VoxIntel Fast Meeting Report - {source_label}",
+        }
+        base_results["summary_engine"] = "optimized-lite-extractive"
+        return base_results
 
 
 def initialize_state() -> None:
     st.session_state.setdefault("results", None)
     st.session_state.setdefault("source_label", "")
     st.session_state.setdefault("status_message", DEFAULT_INFO_TEXT)
+    st.session_state.setdefault("audio_cache", {})
 
 
 def classify_upload_for_laptop(uploaded_file) -> tuple[str, str]:
@@ -267,7 +310,39 @@ def render_results(results: dict) -> None:
             st.caption(f"Meeting date: {meeting_date}")
         if results.get("diarization_engine"):
             st.caption(f"Diarization: {results['diarization_engine']}")
-        st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Interactive Speaker Renaming Widget
+    segments = results.get("segments", [])
+    unique_speakers = sorted(list({s.get("speaker") for s in segments if s.get("speaker")}))
+    if unique_speakers and any("Speaker" in s for s in unique_speakers):
+        with st.expander("👤 Map Speaker Labels to Names", expanded=False):
+            st.markdown(
+                "Assign real attendee names to detected speaker clusters (e.g. `Speaker 1` ➔ `Sarah`). "
+                "Updates apply across transcript, MoM, and speaker activity charts immediately without re-transcription."
+            )
+            cols = st.columns(min(max(len(unique_speakers), 1), 4))
+            name_map = {}
+            for idx, spk in enumerate(unique_speakers):
+                with cols[idx % len(cols)]:
+                    current_alias = st.session_state.get(f"alias_{spk}", spk)
+                    new_val = st.text_input(f"Label: {spk}", value=current_alias, key=f"alias_input_{spk}")
+                    if new_val and new_val.strip() and new_val.strip() != spk:
+                        name_map[spk] = new_val.strip()
+
+            if st.button("Apply Speaker Names", key="apply_speaker_names_btn"):
+                if name_map:
+                    for s in segments:
+                        if s.get("speaker") in name_map:
+                            s["speaker"] = name_map[s["speaker"]]
+                    if "speaker_activity" in results and not results["speaker_activity"].empty:
+                        results["speaker_activity"]["speaker"] = results["speaker_activity"]["speaker"].replace(name_map)
+                    curr_part = results["mom"].get("participants", [])
+                    results["mom"]["participants"] = [name_map.get(p, p) for p in curr_part]
+                    for spk, alias in name_map.items():
+                        st.session_state[f"alias_{spk}"] = alias
+                    st.success("Speaker names updated across transcript and analytics!")
+                    st.experimental_rerun()
 
     st.subheader("Minutes of Meeting")
     mom = results["mom"]
@@ -410,15 +485,45 @@ def main() -> None:
             st.caption("⚡ **Fast Mode**: Faster-Whisper base (int8 CPU) + TextRank summarization. Extremely fast, lightweight, and works offline with zero dependencies.")
 
     if input_mode == "Bundled sample":
-        sample_files = sorted(path.name for path in SAMPLES_DIR.glob("*.txt"))
+        sample_files = sorted(
+            [path.name for path in SAMPLES_DIR.glob("*.txt")]
+            + [path.name for path in SAMPLES_DIR.glob("*.mp3")]
+            + [path.name for path in SAMPLES_DIR.glob("*.wav")]
+        )
         selected_sample = st.sidebar.selectbox("Sample meeting", sample_files)
-        transcript = load_sample_transcript(selected_sample)
+        sample_path = SAMPLES_DIR / selected_sample
         source_label = selected_sample
         with action_col:
             start_analysis = st.button("Start Analysis", type="primary", use_container_width=True, key="sample_start")
         if start_analysis:
-            update_progress(progress_bar, status_box, 15, f"Loading bundled sample: {source_label}")
-            analyze_transcript(transcript, source_label, "Rule-based", progress_bar, status_box)
+            if sample_path.suffix.lower() == ".txt":
+                transcript = load_sample_transcript(selected_sample)
+                update_progress(progress_bar, status_box, 15, f"Loading bundled sample: {source_label}")
+                analyze_transcript(transcript, source_label, "Rule-based", progress_bar, status_box)
+            else:
+                try:
+                    update_progress(progress_bar, status_box, 15, f"Ingesting bundled audio: {source_label}...")
+                    file_bytes = sample_path.read_bytes()
+                    results = process_meeting_audio(
+                        audio_path=sample_path,
+                        file_bytes=file_bytes,
+                        source_label=source_label,
+                        is_smart_mode=is_smart_mode,
+                        attendees=attendees,
+                        progress_bar=progress_bar,
+                        status_box=status_box,
+                    )
+                    st.session_state["results"] = results
+                    st.session_state["source_label"] = source_label
+                    st.session_state["status_message"] = f"Analysis complete for {source_label}."
+                    progress_bar.progress(100)
+                    status_box.success(st.session_state["status_message"])
+                except Exception as exc:
+                    st.session_state["results"] = None
+                    st.session_state["source_label"] = source_label
+                    st.session_state["status_message"] = str(exc)
+                    progress_bar.empty()
+                    status_box.error(str(exc))
     else:
         uploaded_file = st.sidebar.file_uploader(
             "Upload meeting file",
@@ -443,32 +548,43 @@ def main() -> None:
                 st.caption(laptop_note)
 
         if start_analysis and uploaded_file is not None:
-            temp_path = save_uploaded_file(uploaded_file)
             source_label = uploaded_file.name
-            try:
-                update_progress(progress_bar, status_box, 15, f"Ingesting {source_label}...")
-                if is_smart_mode:
-                    results = build_ollama_results(temp_path, progress_bar, status_box, attendees=attendees)
+            file_bytes = uploaded_file.getvalue()
+            if uploaded_file.name.lower().endswith(".txt"):
+                try:
+                    transcript = file_bytes.decode("utf-8", errors="replace")
+                    update_progress(progress_bar, status_box, 15, f"Loading uploaded transcript: {source_label}")
+                    analyze_transcript(transcript, source_label, "Rule-based", progress_bar, status_box)
+                except Exception as exc:
+                    st.session_state["status_message"] = str(exc)
+                    status_box.error(str(exc))
+            else:
+                temp_path = save_uploaded_file(uploaded_file)
+                try:
+                    update_progress(progress_bar, status_box, 15, f"Ingesting {source_label}...")
+                    results = process_meeting_audio(
+                        audio_path=temp_path,
+                        file_bytes=file_bytes,
+                        source_label=source_label,
+                        is_smart_mode=is_smart_mode,
+                        attendees=attendees,
+                        progress_bar=progress_bar,
+                        status_box=status_box,
+                    )
                     st.session_state["results"] = results
                     st.session_state["source_label"] = source_label
-                    st.session_state["status_message"] = f"Smart Mode analysis complete for {source_label}."
+                    mode_label = "Smart Mode" if is_smart_mode else "Fast Mode"
+                    st.session_state["status_message"] = f"{mode_label} analysis complete for {source_label}."
                     progress_bar.progress(100)
                     status_box.success(st.session_state["status_message"])
-                else:
-                    results = build_optimized_results(temp_path, progress_bar, status_box, attendees=attendees)
-                    st.session_state["results"] = results
+                except Exception as exc:
+                    st.session_state["results"] = None
                     st.session_state["source_label"] = source_label
-                    st.session_state["status_message"] = f"Fast Mode analysis complete for {source_label}."
-                    progress_bar.progress(100)
-                    status_box.success(st.session_state["status_message"])
-            except (TranscriptionError, ValueError, OptimizedPipelineError, OllamaPolishError) as exc:
-                st.session_state["results"] = None
-                st.session_state["source_label"] = source_label
-                st.session_state["status_message"] = str(exc)
-                progress_bar.empty()
-                status_box.error(str(exc))
-            finally:
-                temp_path.unlink(missing_ok=True)
+                    st.session_state["status_message"] = str(exc)
+                    progress_bar.empty()
+                    status_box.error(str(exc))
+                finally:
+                    temp_path.unlink(missing_ok=True)
 
     st.sidebar.markdown("### Workflow")
     if is_smart_mode:

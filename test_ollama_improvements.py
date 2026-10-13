@@ -75,6 +75,38 @@ NEXT STEPS:
     print(f"✓ Parse: Correctly parsed {len(result['action_items'])} action items with confidence values")
 
 
+def test_json_response_parsing():
+    """Test parsing of JSON response with timestamp and speaker citations."""
+    json_response = """```json
+{
+  "title": "Release Readiness Review",
+  "summary": "The team reviewed the authentication bug fix. George committed to deploying the permanent patch by Friday.",
+  "discussion_points": [
+    {"time": "00:07", "speaker": "George", "point": "Token management causes login failures"}
+  ],
+  "decisions": [
+    {"time": "00:29", "speaker": "Ravi", "decision": "Deploy temporary workaround today"}
+  ],
+  "action_items": [
+    {"time": "00:23", "owner": "George", "task": "Release permanent login patch", "deadline": "Friday 5 PM", "confidence": 0.95}
+  ],
+  "risks": ["Token expiration during deployment"],
+  "next_steps": ["Deploy workaround"]
+}
+```"""
+    result = _parse_sectioned_response(json_response)
+    assert result["title"] == "Release Readiness Review"
+    assert "George" in result["summary"]
+    assert len(result["discussion_points"]) == 1
+    assert "[00:07] George:" in result["discussion_points"][0]
+    assert len(result["decisions"]) == 1
+    assert "[00:29]" in result["decisions"][0]
+    assert len(result["action_items"]) == 1
+    assert result["action_items"][0]["owner"] == "George"
+    assert result["action_items"][0]["task"] == "Release permanent login patch"
+    print("✓ JSON Parse: Successfully parsed structured JSON with timestamps and speakers")
+
+
 def test_post_process_response():
     """Test quality post-processing and confidence filtering."""
     raw_response = {
