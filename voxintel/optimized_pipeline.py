@@ -162,7 +162,7 @@ def transcribe_chunks(chunk_paths: list[Path], progress_callback=None) -> tuple[
     return transcript, all_segments
 
 
-def run_optimized_voxintel(audio_file: str | Path, progress_callback=None) -> dict:
+def run_optimized_voxintel(audio_file: str | Path, progress_callback=None, attendees: list[str] | None = None) -> dict:
     audio_path = Path(audio_file)
     try:
         prepared_audio = _prepare_audio_file(audio_path)
@@ -173,14 +173,22 @@ def run_optimized_voxintel(audio_file: str | Path, progress_callback=None) -> di
 
     try:
         prepared_duration = get_audio_duration_seconds(prepared_audio)
-        with tempfile.TemporaryDirectory() as temp_dir:
-            chunk_paths = chunk_audio(prepared_audio, Path(temp_dir), chunk_seconds=DEFAULT_CHUNK_SECONDS)
-            transcript, segments = transcribe_chunks(chunk_paths, progress_callback=progress_callback)
+        if progress_callback:
+            progress_callback(30, "Transcribing audio with faster-whisper (fast whole-file VAD)...")
+
+        # Fast direct transcription without splitting into 25 WAV files on disk
+        segments = transcribe_local_whisper_segments(prepared_audio)
+        transcript = " ".join(s["text"] for s in segments if s.get("text")).strip()
+        if not transcript:
+            raise TranscriptionError("Speech transcription finished, but no audible speech could be extracted.")
+
+        if progress_callback:
+            progress_callback(65, "Extracting meeting insights and generating MoM...")
 
         cleaned_text, sentences, tokens = clean_transcript(transcript)
         keyword_df = extract_keywords(cleaned_text)
         summary, _ = generate_summary(sentences, tokens, transcript=cleaned_text, method="rule_based")
-        mom = generate_mom(transcript, summary)
+        mom = generate_mom(transcript, summary, attendees=attendees)
         action_items = pd.DataFrame(mom["action_items"])
 
         return {

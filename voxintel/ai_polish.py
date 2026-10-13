@@ -18,16 +18,14 @@ def _run_ollama(prompt: str, model: str = "phi:latest", max_tokens: int = 256) -
             json={
                 "model": model,
                 "prompt": prompt,
-                "stream": True,
+                "stream": False,
                 "options": {
                     "temperature": 0.0,
                     "num_predict": max_tokens,
                     "top_p": 0.9,
                 },
             },
-            timeout=300,
-            stream=True,
-
+            timeout=120,
         )
         response.raise_for_status()
         data = response.json()

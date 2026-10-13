@@ -36,6 +36,9 @@ def _get_openai_client():
 
 
 def _find_ffprobe() -> Path | None:
+    system_ffprobe = shutil.which("ffprobe")
+    if system_ffprobe:
+        return Path(system_ffprobe)
     ffmpeg_path = _find_ffmpeg()
     if ffmpeg_path:
         ffprobe_path = ffmpeg_path.with_name("ffprobe.exe")

@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import json
 import os
@@ -138,16 +138,63 @@ def _rewrite_formal_style(text: str) -> str:
     return text
 
 
-def _post_process_response(parsed_response: dict, confidence_threshold: float = 0.6) -> dict:
+def _polish_title(title: str) -> str:
+    title = _normalize_sentence(title).rstrip(".")
+    title = re.sub(r"\b(discussed stuff|talked about stuff|stuff)\b", "Discussion", title, flags=re.IGNORECASE)
+    title = re.sub(r"^(The team discussed|We discussed|Discussion on)\s+", "", title, flags=re.IGNORECASE)
+    if not title or title.lower() in {"meeting", "discussion", "update"}:
+        return "Executive Meeting Summary"
+    title = title[0].upper() + title[1:]
+    return title
+
+
+def _post_process_response(
+    parsed_response: dict,
+    confidence_threshold: float = 0.6,
+    drop_generic_owners: bool = False,
+    require_participant_names: bool = False,
+    auto_fix_grammar: bool = False,
+) -> dict:
     result = dict(parsed_response)
-    # Polish title and summary
-    result["title"] = _rewrite_formal_style(result["title"])
-    result["summary"] = _rewrite_formal_style(result["summary"])
-    # Filter low-confidence actions
-    filtered_actions = [a for a in result["action_items"] if a["confidence"] >= confidence_threshold]
+    # Polish title
+    result["title"] = _polish_title(result.get("title", ""))
+
+    # Summary: split, cap to 4 sentences, and polish
+    raw_summary = result.get("summary", "")
+    sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", raw_summary) if s.strip()]
+    if len(sentences) > 4:
+        sentences = sentences[:4]
+    
+    formatted_sentences = []
+    for s in sentences:
+        s_norm = _rewrite_formal_style(s) if auto_fix_grammar or "we" in s.lower() else _normalize_sentence(s)
+        formatted_sentences.append(s_norm)
+    result["summary"] = " ".join(formatted_sentences)
+
+    # Filter action items
+    raw_actions = list(result.get("action_items", []))
+    filtered_actions = []
+    num_filtered = 0
+    quality_warnings = []
+
+    for item in raw_actions:
+        conf = float(item.get("confidence", 0.7))
+        owner = str(item.get("owner", "Team")).strip()
+
+        if conf < confidence_threshold:
+            num_filtered += 1
+            quality_warnings.append(f"Filtered low-confidence task ({conf:.2f} < {confidence_threshold:.2f}): {item.get('task')}")
+            continue
+
+        if owner.lower() in {"team", "unknown"}:
+            quality_warnings.append(f"Action item has generic owner '{owner}': {item.get('task')}")
+
+        filtered_actions.append(item)
+
     result["action_items"] = filtered_actions[:5]
-    result["quality_score"] = 1.0
-    result["quality_warnings"] = []
+    result["num_filtered_items"] = num_filtered
+    result["quality_warnings"] = quality_warnings
+    result["quality_score"] = max(0.0, min(1.0, 1.0 - (0.15 * len(quality_warnings))))
     return result
 
 
@@ -187,12 +234,13 @@ def _call_ollama(prompt: str, confidence_threshold: float = None) -> dict:
 
 def polish_with_ollama(audio_path: str | Path, 
                        progress_callback=None,
-                       confidence_threshold: float = None) -> dict:
+                       confidence_threshold: float = None,
+                       attendees: list[str] | None = None) -> dict:
     if progress_callback:
         progress_callback(20, "Running optimized transcription...")
 
     try:
-        base_results = run_optimized_voxintel(audio_path, progress_callback=progress_callback)
+        base_results = run_optimized_voxintel(audio_path, progress_callback=progress_callback, attendees=attendees)
     except OptimizedPipelineError as exc:
         raise OllamaPolishError(str(exc)) from exc
 

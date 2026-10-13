@@ -66,6 +66,14 @@ STOPWORDS = {
     "with",
     "you",
     "your",
+    # Contraction tails
+    "ve",
+    "ll",
+    "re",
+    "d",
+    "m",
+    "s",
+    "t",
 }
 
 FILLER_WORDS = {"um", "uh", "hmm", "like", "you know", "basically", "actually", "right"}
@@ -232,25 +240,6 @@ def tokenize(text: str) -> list[str]:
     return re.findall(r"[A-Za-z']+", text.lower())
 
 
-def _correct_suspicious_token(token: str) -> str:
-    normalized = token.lower().replace("'", "")
-    if len(normalized) <= 4 or normalized in ALLOWED_WORDS or normalized.isdigit():
-        return token
-    if normalized in COMMON_FIXES:
-        return COMMON_FIXES[normalized]
-    match = difflib.get_close_matches(normalized, ALLOWED_WORDS, n=1, cutoff=0.86)
-    return match[0] if match else token
-
-
-def _apply_token_corrections(text: str) -> str:
-    def replace_token(match: re.Match[str]) -> str:
-        original = match.group(0)
-        corrected = _correct_suspicious_token(original)
-        return corrected
-
-    return re.sub(r"[A-Za-z']+", replace_token, text)
-
-
 def clean_transcript(text: str) -> tuple[str, list[str], list[str]]:
     normalized = re.sub(r"\s+", " ", text).strip()
     if not normalized:
@@ -259,7 +248,6 @@ def clean_transcript(text: str) -> tuple[str, list[str], list[str]]:
     cleaned = normalized
     for source, target in COMMON_FIXES.items():
         cleaned = re.sub(rf"\b{re.escape(source)}\b", target, cleaned, flags=re.IGNORECASE)
-    cleaned = _apply_token_corrections(cleaned)
     for filler in sorted(FILLER_WORDS, key=len, reverse=True):
         cleaned = re.sub(rf"\b{re.escape(filler)}\b", "", cleaned, flags=re.IGNORECASE)
 
@@ -289,8 +277,9 @@ def extract_keywords(text_or_tokens: str | list[str], top_n: int = 10) -> pd.Dat
     if not windows:
         windows = [" ".join(filtered)]
 
+    all_stops = list(STOPWORDS | LOW_SIGNAL_WORDS | FILLER_WORDS)
     vectorizer = TfidfVectorizer(
-        stop_words="english",
+        stop_words=all_stops,
         ngram_range=(1, 2),
         max_features=max(top_n * 3, 15),
     )

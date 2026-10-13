@@ -1,48 +1,51 @@
-﻿# VoxIntel
+# VoxIntel
 
-Audio Intelligence for Automated Meeting Insights.
-
-VoxIntel is a lightweight Streamlit app that converts meeting audio into structured insights such as transcript summaries, keywords, decisions, action items, and downloadable MoM reports.
+VoxIntel is a beginner-friendly Streamlit project that turns meeting audio or sample transcripts into structured meeting intelligence.
 
 ## Features
-- Upload `.mp3`, `.wav`, or `.txt` meeting input
-- Audio preprocessing and local speech-to-text pipeline
-- Keyword extraction with TF-IDF
-- Extractive summary generation
-- Decision and action-item extraction
-- Download insights as JSON, HTML, and PDF
-- Optional local Ollama polishing path
 
-## Project Structure
-- `app.py` - Streamlit application entry point
-- `voxintel/` - core processing modules
-- `data/samples/` - bundled demo meeting transcripts
-- `templates/` - HTML template for report export
-- `assets/` - repository assets folder for screenshots or demo media
+- Upload `.wav` / `.mp3` meeting audio for transcription
+- Use bundled synthetic meeting samples for deterministic demos
+- Use an OpenAI long-meeting pipeline for chunked diarized transcription and structured meeting intelligence
+- Clean transcripts and remove filler words
+- Extract top keywords and basic speaker activity
+- Generate a rule-based summary or an AI-assisted summary
+- Produce Minutes of Meeting with action items
+- Visualize results in a polished Streamlit dashboard
 
-## Tech Stack
-- Python
-- Streamlit
-- faster-whisper
-- ffmpeg
-- pandas
-- scikit-learn
-- librosa
-- matplotlib
-- Ollama
+## Quick start
 
-## Run Locally
-```powershell
+```bash
+python -m venv .venv
+.venv\Scripts\activate
 pip install -r requirements.txt
-python -m streamlit run app.py
+set OPENAI_API_KEY=your_key_here
+streamlit run app.py
 ```
 
-Then open `http://localhost:8501`.
+Optional local diarization extras:
 
-## Recommended Mode
-For low-memory laptops, use `Optimized lite pipeline`.
+```bash
+pip install -r requirements-optional.txt
+```
+
+## Project structure
+
+- `app.py`: Streamlit dashboard
+- `voxintel/audio.py`: audio intake and transcription helpers
+- `voxintel/nlp.py`: transcript cleaning and keyword extraction
+- `voxintel/insights.py`: summary, MoM, and action-item heuristics
+- `voxintel/ml.py`: optional transformer summarization helpers
+- `voxintel/openai_pipeline.py`: chunked OpenAI transcription, diarization, speaker analytics, and structured meeting synthesis
+- `voxintel/local_hybrid_pipeline.py`: local chunked transcription, optional pyannote diarization, and hybrid report generation
+- `voxintel/exports.py`: Jinja2 HTML and PDF export helpers
+- `data/samples/`: synthetic meeting transcripts used for demos and tests
+- `tests/`: unit tests for core processing
 
 ## Notes
-- The project is optimized for local execution on modest hardware.
-- Output quality depends heavily on transcript quality.
-- Ollama polishing is optional and works best with a lightweight local model.
+
+- Audio transcription depends on `SpeechRecognition`. `.mp3` files are converted to `.wav` when `pydub` is available.
+- The recommended path for real meeting audio is the OpenAI long-meeting pipeline, which uses diarized transcription plus GPT-generated summary and MoM.
+- The hybrid local AI pipeline attempts local Whisper-style transcription first, then optional pyannote diarization when a Hugging Face token is available.
+- AI summarization uses Hugging Face `transformers` when available locally. If the model or dependency is missing, VoxIntel falls back to the built-in rule-based summary.
+- If live transcription fails in your environment, the app still supports transcript-file testing and bundled meeting samples.

@@ -10,3 +10,15 @@ __pycache__/
 build/
 dist/
 temp/
+.env
+*.zip
+*.docx
+data/models/
+_tmp*
+workspace_tmp/
+MinigitWork/
+Retail_Project/
+extracted_report.txt
+ecg-folder-file-list.txt
+temp_check.py
+minigit_fix*

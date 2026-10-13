@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import json
+import shutil
 import subprocess
 import tempfile
 from functools import lru_cache
@@ -109,6 +110,10 @@ def _run_ffmpeg_decode(ffmpeg_path: Path, source_path: Path, output_path: Path, 
 
 
 def _find_ffmpeg() -> Path | None:
+    system_ffmpeg = shutil.which("ffmpeg")
+    if system_ffmpeg:
+        return Path(system_ffmpeg)
+
     candidate_paths = [
         Path(
             r"C:\Users\eshan\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1-full_build\bin\ffmpeg.exe"
@@ -141,6 +146,12 @@ def _transcribe_with_faster_whisper(wav_path: Path) -> str:
     return transcript
 
 
+MEETING_INITIAL_PROMPT = (
+    "Meeting discussion regarding sprint planning, UI, UX, authentication bug, "
+    "release deadline, deployment, and task action items."
+)
+
+
 def _transcribe_with_faster_whisper_segments(wav_path: Path) -> list[dict]:
     try:
         from faster_whisper import WhisperModel
@@ -151,7 +162,12 @@ def _transcribe_with_faster_whisper_segments(wav_path: Path) -> list[dict]:
 
     try:
         model = _get_faster_whisper_model()
-        raw_segments, _ = model.transcribe(str(wav_path), beam_size=1, vad_filter=True)
+        raw_segments, _ = model.transcribe(
+            str(wav_path),
+            beam_size=1,
+            vad_filter=True,
+            initial_prompt=MEETING_INITIAL_PROMPT,
+        )
         segments = [
             {
                 "id": f"whisper-{index}",
@@ -184,6 +200,11 @@ def _transcribe_with_faster_whisper_segments(wav_path: Path) -> list[dict]:
 def _get_faster_whisper_model():
     from faster_whisper import WhisperModel
 
+    for size in ("base", "tiny"):
+        try:
+            return WhisperModel(size, device="cpu", compute_type="int8", cpu_threads=4)
+        except Exception:
+            continue
     return WhisperModel("tiny", device="cpu", compute_type="int8")
 
 

@@ -59,7 +59,7 @@ def _run_ollama_writer(prompt: str, model: str = "phi:latest") -> str:
         return result_text.strip()
 
     except (requests.RequestException, KeyError) as exc:
-        raise LocalPolishUnavailable(f"Ollama writer unavailable: {exc}") from ex
+        raise LocalPolishUnavailable(f"Ollama writer unavailable: {exc}") from exc
         
 
 @lru_cache(maxsize=1)

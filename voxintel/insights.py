@@ -190,8 +190,10 @@ def generate_summary(
     return _generate_rule_based_summary(sentences, tokens), "rule_based"
 
 
-def extract_action_items(sentences: list[str]) -> list[dict[str, str]]:
+def extract_action_items(sentences: list[str], attendees: list[str] | None = None) -> list[dict[str, str]]:
     action_items: list[dict[str, str]] = []
+    attendee_set = {a.lower().strip() for a in attendees} if attendees else set()
+    invalid_person_words = {"the", "this", "that", "it", "there", "we", "our", "all", "each", "both", "login", "the login"}
 
     for sentence in sentences:
         stripped = sentence.strip()
@@ -211,8 +213,23 @@ def extract_action_items(sentences: list[str]) -> list[dict[str, str]]:
                 continue
             matched_rule = True
             detected_person = (match.groupdict().get("person") or "").strip()
-            if not detected_person and stripped.lower().startswith("we "):
+            
+            # Filter non-person nouns and validate
+            lower_person = detected_person.lower()
+            if lower_person in invalid_person_words or any(lower_person.startswith(inv + " ") for inv in ["the", "this", "that"]):
                 detected_person = "Team"
+            elif attendee_set:
+                matched_att = next((att for att in attendees if att.lower() in lower_person or lower_person in att.lower()), None)
+                detected_person = matched_att if matched_att else "Unassigned"
+            elif not detected_person and stripped.lower().startswith("we "):
+                detected_person = "Team"
+            elif detected_person and not _validate_name(detected_person) and lower_person not in {"team", "unassigned"}:
+                # If single word name that is capitalized, keep it (like Sarah, John)
+                if len(detected_person.split()) == 1 and detected_person[0].isupper():
+                    pass
+                else:
+                    detected_person = "Unassigned"
+
             action_items.append(
                 {
                     "task": _clean_task(task),
@@ -325,13 +342,18 @@ def _extract_decisions(sentences: list[str]) -> list[str]:
     return decisions[:3] or ["No explicit decisions were detected."]
 
 
-def generate_mom(transcript: str, summary: str) -> dict:
+def generate_mom(transcript: str, summary: str, attendees: list[str] | None = None) -> dict:
     cleaned_text, sentences, tokens = clean_transcript(transcript)
     _ = tokens
-    action_items = extract_action_items(sentences)
+    action_items = extract_action_items(sentences, attendees=attendees)
+    extracted_participants = _extract_participants(transcript)
+    if attendees:
+        final_participants = sorted(set(attendees) | set(extracted_participants))
+    else:
+        final_participants = extracted_participants
 
     return {
-        "participants": _extract_participants(transcript),
+        "participants": final_participants,
         "meeting_date": _extract_meeting_date(transcript),
         "discussion_points": _extract_discussion_points(sentences, summary),
         "decisions": _extract_decisions(sentences),

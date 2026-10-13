@@ -170,21 +170,21 @@ def build_hybrid_local_results(
     }
 
 
-def build_optimized_results(audio_path: Path, progress_bar, status_box) -> dict:
+def build_optimized_results(audio_path: Path, progress_bar, status_box, attendees: list[str] | None = None) -> dict:
     def progress_callback(value: int, message: str) -> None:
         update_progress(progress_bar, status_box, value, message)
 
-    return run_optimized_voxintel(audio_path, progress_callback=progress_callback)
+    return run_optimized_voxintel(audio_path, progress_callback=progress_callback, attendees=attendees)
 
 
-def build_ollama_results(audio_path: Path, progress_bar, status_box) -> dict:
+def build_ollama_results(audio_path: Path, progress_bar, status_box, attendees: list[str] | None = None) -> dict:
     def progress_callback(value: int, message: str) -> None:
         update_progress(progress_bar, status_box, value, message)
 
     try:
-        return polish_with_ollama(audio_path, progress_callback=progress_callback)
+        return polish_with_ollama(audio_path, progress_callback=progress_callback, attendees=attendees)
     except OllamaPolishError as exc:
-        fallback = build_optimized_results(audio_path, progress_bar, status_box)
+        fallback = build_optimized_results(audio_path, progress_bar, status_box, attendees=attendees)
         fallback["summary_engine"] = "ollama-polish"
         fallback["ollama_polish_used"] = False
         fallback["ollama_polish_error"] = str(exc)
@@ -384,42 +384,30 @@ def main() -> None:
 
     st.sidebar.header("Input")
     input_mode = st.sidebar.radio("Choose source", ["Bundled sample", "Upload file"])
-    analysis_engine = st.sidebar.selectbox(
-        "Meeting intelligence engine",
-        ["Optimized lite pipeline", "Local + Ollama polish", "Hybrid local AI pipeline", "Local demo pipeline"],
-        help="Optimized lite is the fastest path for your 8 GB laptop. Ollama polish keeps local transcription but improves the final write-up using a local model.",
+    pipeline_mode = st.sidebar.selectbox(
+        "Processing Mode",
+        ["⚡ Fast Mode (Whisper + TextRank)", "🧠 Smart Mode (Whisper + Ollama LLM)"],
+        help="Fast Mode runs 100% locally with zero GPU requirements in ~10 seconds. Smart Mode runs Ollama locally to synthesize executive-level Minutes of Meeting.",
     )
-    lite_mode = st.sidebar.checkbox(
-        "8 GB RAM Lite mode",
-        value=True,
-        help="Recommended for your laptop. Uses smaller chunks and skips heavier speaker analysis paths for better stability.",
+    is_smart_mode = "Smart Mode" in pipeline_mode
+
+    attendees_input = st.sidebar.text_input(
+        "Expected Attendees (Optional)",
+        placeholder="e.g. Eshan, Neeraj, Sarah",
+        help="Helps accurately assign action items to real participant names instead of generic entities.",
     )
-    diarization_mode = st.sidebar.selectbox(
-        "Speaker diarization",
-        ["Off", "Fast", "Accurate"],
-        index=1,
-        help="Fast uses lightweight clustering and is much quicker. Accurate is heavier and slower on 8 GB RAM.",
-    )
-    diarization_mode_key = diarization_mode.lower()
-    if lite_mode and diarization_mode_key == "accurate":
-        st.sidebar.warning("Lite mode and accurate diarization are a rough combo on 8 GB RAM. Expect much slower processing.")
-    summary_mode = st.sidebar.selectbox("Summary mode", ["AI-assisted", "Rule-based"])
-    meeting_context = st.sidebar.text_area(
-        "Meeting context (optional)",
-        placeholder="Example: Product release readiness review with engineering, design, and QA.",
-    )
+    attendees = [a.strip() for a in attendees_input.split(",") if a.strip()] if attendees_input else None
+
     progress_bar = st.progress(0)
     status_box = st.empty()
     status_box.info(st.session_state["status_message"])
 
     action_col, hint_col = st.columns([1, 2])
     with hint_col:
-        if analysis_engine == "Optimized lite pipeline":
-            st.caption("Use the optimized lite engine for the fastest laptop-friendly path: audio preprocessing, 60-second chunks, tiny Whisper, simple keywords, summary, and action items.")
-        elif analysis_engine == "Local + Ollama polish":
-            st.caption("Use local transcription with Ollama only for the final polished summary, discussion points, decisions, and MoM.")
+        if is_smart_mode:
+            st.caption("🧠 **Smart Mode**: Whisper base ASR + Ollama (`llama3.2:3b` / `phi3`) for executive MoM, structured decisions, and verified action items. Requires Ollama running.")
         else:
-            st.caption("Use the hybrid local engine for long real meetings. Lite mode is recommended on 8 GB RAM and keeps the app more stable.")
+            st.caption("⚡ **Fast Mode**: Faster-Whisper base (int8 CPU) + TextRank summarization. Extremely fast, lightweight, and works offline with zero dependencies.")
 
     if input_mode == "Bundled sample":
         sample_files = sorted(path.name for path in SAMPLES_DIR.glob("*.txt"))
@@ -430,12 +418,12 @@ def main() -> None:
             start_analysis = st.button("Start Analysis", type="primary", use_container_width=True, key="sample_start")
         if start_analysis:
             update_progress(progress_bar, status_box, 15, f"Loading bundled sample: {source_label}")
-            analyze_transcript(transcript, source_label, summary_mode, progress_bar, status_box)
+            analyze_transcript(transcript, source_label, "Rule-based", progress_bar, status_box)
     else:
         uploaded_file = st.sidebar.file_uploader(
             "Upload meeting file",
             type=["wav", "mp3", "txt"],
-            help="Audio is preferred. TXT is supported as a transcript fallback for demos.",
+            help="Audio files (.mp3, .wav) are automatically transcribed. TXT sample transcripts also supported.",
         )
         with action_col:
             start_analysis = st.button(
@@ -451,58 +439,29 @@ def main() -> None:
             risk_level, laptop_note = classify_upload_for_laptop(uploaded_file)
             if risk_level == "high":
                 st.warning(laptop_note)
-            elif risk_level == "medium":
-                st.info(laptop_note)
             else:
                 st.caption(laptop_note)
+
         if start_analysis and uploaded_file is not None:
             temp_path = save_uploaded_file(uploaded_file)
             source_label = uploaded_file.name
             try:
-                update_progress(progress_bar, status_box, 15, f"Queued {source_label} for processing...")
-                if analysis_engine == "Hybrid local AI pipeline":
-                    update_progress(
-                        progress_bar,
-                        status_box,
-                        22,
-                        "Preparing local hybrid pipeline and memory-safe audio chunks..."
-                        if lite_mode
-                        else "Preparing local hybrid pipeline and audio chunks...",
-                    )
-                    results = build_hybrid_local_results(
-                        temp_path,
-                        meeting_context,
-                        progress_bar,
-                        status_box,
-                        diarization_mode_key,
-                        lite_mode,
-                    )
+                update_progress(progress_bar, status_box, 15, f"Ingesting {source_label}...")
+                if is_smart_mode:
+                    results = build_ollama_results(temp_path, progress_bar, status_box, attendees=attendees)
                     st.session_state["results"] = results
                     st.session_state["source_label"] = source_label
-                    st.session_state["status_message"] = f"Hybrid local analysis complete for {source_label}."
-                    progress_bar.progress(100)
-                    status_box.success(st.session_state["status_message"])
-                elif analysis_engine == "Optimized lite pipeline":
-                    update_progress(progress_bar, status_box, 22, "Preparing optimized lite pipeline...")
-                    results = build_optimized_results(temp_path, progress_bar, status_box)
-                    st.session_state["results"] = results
-                    st.session_state["source_label"] = source_label
-                    st.session_state["status_message"] = f"Optimized lite analysis complete for {source_label}."
-                    progress_bar.progress(100)
-                    status_box.success(st.session_state["status_message"])
-                elif analysis_engine == "Local + Ollama polish":
-                    update_progress(progress_bar, status_box, 22, "Preparing local transcript + Ollama polish pipeline...")
-                    results = build_ollama_results(temp_path, progress_bar, status_box)
-                    st.session_state["results"] = results
-                    st.session_state["source_label"] = source_label
-                    st.session_state["status_message"] = f"Local + Ollama analysis complete for {source_label}."
+                    st.session_state["status_message"] = f"Smart Mode analysis complete for {source_label}."
                     progress_bar.progress(100)
                     status_box.success(st.session_state["status_message"])
                 else:
-                    update_progress(progress_bar, status_box, 35, "Transcribing audio. MP3 files may take a little longer here...")
-                    transcript = process_audio(temp_path)
-                    analyze_transcript(transcript, source_label, summary_mode, progress_bar, status_box)
-            except (TranscriptionError, ValueError, LocalHybridPipelineError, OptimizedPipelineError, OllamaPolishError) as exc:
+                    results = build_optimized_results(temp_path, progress_bar, status_box, attendees=attendees)
+                    st.session_state["results"] = results
+                    st.session_state["source_label"] = source_label
+                    st.session_state["status_message"] = f"Fast Mode analysis complete for {source_label}."
+                    progress_bar.progress(100)
+                    status_box.success(st.session_state["status_message"])
+            except (TranscriptionError, ValueError, OptimizedPipelineError, OllamaPolishError) as exc:
                 st.session_state["results"] = None
                 st.session_state["source_label"] = source_label
                 st.session_state["status_message"] = str(exc)
@@ -512,28 +471,10 @@ def main() -> None:
                 temp_path.unlink(missing_ok=True)
 
     st.sidebar.markdown("### Workflow")
-    if analysis_engine == "Optimized lite pipeline":
-        st.sidebar.caption("Input -> FFmpeg preprocessing -> 60s chunks -> faster-whisper tiny/int8 -> cleanup -> keywords -> summary -> action items")
-        st.sidebar.caption("This is the recommended path for your 8 GB RAM laptop.")
-    elif analysis_engine == "Local + Ollama polish":
-        st.sidebar.caption("Input -> Local optimized transcription -> draft insights -> Ollama structured polish -> HTML/PDF export")
-        st.sidebar.caption("Requires local Ollama running on http://127.0.0.1:11434. PDF download is included.")
-    elif analysis_engine == "Hybrid local AI pipeline":
-        st.sidebar.caption(
-            "Input -> Smaller chunks -> Local transcription -> Optional diarization -> Fast local polished writer -> HTML/PDF export"
-            if lite_mode
-            else "Input -> Chunking -> Whisper timestamps -> Optional diarization -> Fast local polished writer -> HTML/PDF export"
-        )
+    if is_smart_mode:
+        st.sidebar.caption("Audio Ingestion -> faster-whisper base (int8 VAD) -> Ollama Local LLM Polish -> HTML / PDF Export")
     else:
-        st.sidebar.caption("Input -> Transcription -> Cleanup -> Analysis -> Summary + MoM")
-    if summary_mode == "AI-assisted":
-        st.sidebar.caption("If the AI model is unavailable locally, VoxIntel will fall back to the rule-based summary.")
-    if analysis_engine == "Hybrid local AI pipeline":
-        st.sidebar.caption("Use Fast diarization for quick approximate speaker separation. Accurate mode may be much slower on your laptop.")
-        st.sidebar.caption("Optional extra: HUGGINGFACE_TOKEN helps only with Accurate diarization.")
-        st.sidebar.caption("This mode stays local for the write-up step to keep results faster and more stable.")
-        if lite_mode:
-            st.sidebar.caption("Lite mode is tuned for 8 GB RAM laptops and avoids the heaviest fallback paths.")
+        st.sidebar.caption("Audio Ingestion -> faster-whisper base (int8 VAD) -> TextRank Graph Summarization -> Action Extraction -> HTML / PDF Export")
 
     results = st.session_state.get("results")
     source_label = st.session_state.get("source_label", "")
