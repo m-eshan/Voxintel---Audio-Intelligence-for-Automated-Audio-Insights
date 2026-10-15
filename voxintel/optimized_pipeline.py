@@ -292,7 +292,7 @@ def run_optimized_voxintel(audio_file: str | Path, progress_callback=None, atten
             progress_callback(30, "Transcribing audio with faster-whisper (fast whole-file VAD)...")
 
         # Fast direct transcription without splitting into 25 WAV files on disk
-        segments = transcribe_local_whisper_segments(prepared_audio)
+        segments = transcribe_local_whisper_segments(prepared_audio, attendees=attendees)
         transcript = " ".join(s["text"] for s in segments if s.get("text")).strip()
         if not transcript:
             raise TranscriptionError("Speech transcription finished, but no audible speech could be extracted.")

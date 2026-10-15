@@ -146,13 +146,24 @@ def _transcribe_with_faster_whisper(wav_path: Path) -> str:
     return transcript
 
 
-MEETING_INITIAL_PROMPT = (
-    "Meeting discussion regarding sprint planning, UI, UX, authentication bug, "
-    "release deadline, deployment, and task action items."
-)
+def _build_meeting_initial_prompt(attendees: list[str] | None = None, custom_prompt: str | None = None) -> str:
+    if custom_prompt:
+        return custom_prompt
+    parts = []
+    if attendees:
+        parts.append(f"Meeting participants: {', '.join(attendees)}.")
+    parts.append(
+        "Discussion regarding sprint planning, release readiness review, authentication bug, "
+        "QA testing, login patch, workaround, customer support, deployment, and task action items."
+    )
+    return " ".join(parts)
 
 
-def _transcribe_with_faster_whisper_segments(wav_path: Path) -> list[dict]:
+def _transcribe_with_faster_whisper_segments(
+    wav_path: Path,
+    attendees: list[str] | None = None,
+    initial_prompt: str | None = None,
+) -> list[dict]:
     try:
         from faster_whisper import WhisperModel
     except ImportError as exc:
@@ -162,11 +173,12 @@ def _transcribe_with_faster_whisper_segments(wav_path: Path) -> list[dict]:
 
     try:
         model = _get_faster_whisper_model()
+        prompt = _build_meeting_initial_prompt(attendees, initial_prompt)
         raw_segments, _ = model.transcribe(
             str(wav_path),
             beam_size=1,
             vad_filter=True,
-            initial_prompt=MEETING_INITIAL_PROMPT,
+            initial_prompt=prompt,
         )
         segments = [
             {
@@ -300,19 +312,29 @@ def transcribe_local_whisper_only(file_path: str | Path) -> str:
                 wav_path.parent.rmdir()
 
 
-def transcribe_local_whisper_segments(file_path: str | Path) -> list[dict]:
+def transcribe_local_whisper_segments(
+    file_path: str | Path,
+    attendees: list[str] | None = None,
+    initial_prompt: str | None = None,
+) -> list[dict]:
     path = validate_input_file(file_path)
-    wav_path = _prepare_audio_file(path)
+    if path.suffix.lower() == ".wav":
+        wav_path = path
+        should_cleanup = False
+    else:
+        wav_path = _prepare_audio_file(path)
+        should_cleanup = True
+
     try:
         try:
-            return _transcribe_with_faster_whisper_segments(wav_path)
+            return _transcribe_with_faster_whisper_segments(wav_path, attendees=attendees, initial_prompt=initial_prompt)
         except TranscriptionError:
             try:
                 return _transcribe_with_openai_whisper_segments(wav_path)
             except TranscriptionError:
                 return _transcribe_with_sphinx_segments(wav_path)
     finally:
-        if wav_path != path and wav_path.exists():
+        if should_cleanup and wav_path != path and wav_path.exists():
             wav_path.unlink(missing_ok=True)
             with contextlib.suppress(OSError):
                 wav_path.parent.rmdir()

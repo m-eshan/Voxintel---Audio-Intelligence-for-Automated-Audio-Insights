@@ -10,18 +10,20 @@ from .nlp import clean_sentences, clean_transcript, split_sentences, tokenize
 
 ACTION_PATTERNS = [
     re.compile(
-        r"(?i)^(?P<person>[A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+(?:will|should|needs to|is going to|to)\s+(?P<task>.+?)(?:\s+(?:by|before|on)\s+(?P<deadline>[^.]+?))?[.]?$"
+        r"(?i)^(?P<person>[A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+(?:will|should|needs to|must|has to|is going to)\s+(?P<task>.+?)(?:\s+(?:by|before|on)\s+(?P<deadline>[^.]+?))?[.]?$"
     ),
     re.compile(
-        r"(?i)^(?:i'll|i\s+will|we'll|we\s+will|i\s+can|we\s+can|i\s+should|i\s+need\s+to|we\s+need\s+to|i\s+am\s+going\s+to|we\s+are\s+going\s+to)\s+(?P<task>.+?)(?:\s+(?:by|before|on)\s+(?P<deadline>[^.]+?))?[.]?$"
+        r"(?i)^(?:(?:once|after|as soon as|when|regarding|before|if)\s+[^,;]+,\s*)?(?:i'll|i\s+will|we'll|we\s+will|i\s+can|we\s+can|i\s+should|i\s+need\s+to|we\s+need\s+to|i\s+am\s+going\s+to|we\s+are\s+going\s+to)\s+(?P<task>.+?)(?:\s+(?:by|before|on|as soon as)\s+(?P<deadline>[^.]+?))?[.]?$"
     ),
     re.compile(
         r"(?i)^action item[:\-]?\s*(?P<person>[A-Z][a-z]+)?\s*(?:will|should|needs to)?\s*(?P<task>.+?)(?:\s+(?:by|before|on)\s+(?P<deadline>[^.]+?))?[.]?$"
     ),
 ]
 
-DECISION_PATTERN = re.compile(r"(?i)\b(decided|agreed|approved|finalized|confirmed)\b")
-DECISION_STRONG_PATTERN = re.compile(r"(?i)\b(decided|approved|finalized|confirmed|moving forward|temporary workaround)\b")
+DECISION_PATTERN = re.compile(r"(?i)\b(decide|decided|decision|agreed|approved|finalized|confirmed)\b")
+DECISION_STRONG_PATTERN = re.compile(
+    r"(?i)\b(decide|decided|decision|approved|agreed|finalized|confirmed|moving forward|temporary workaround|workaround)\b"
+)
 DATE_PATTERN = re.compile(
     r"\b(?:\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|"
     r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{1,2}(?:,\s*\d{4})?)\b",
@@ -193,13 +195,24 @@ def generate_summary(
 
 
 def _find_segment_for_sentence(sentence: str, segments: list[dict] | None) -> dict | None:
-    if not segments:
+    if not segments or not sentence:
         return None
-    s_clean = re.sub(r"[^a-z0-9]", "", sentence.lower())
+    s_tokens = set(re.findall(r"[a-z0-9]+", sentence.lower()))
+    if not s_tokens:
+        return None
+    best_seg = None
+    best_overlap = 0.0
     for seg in segments:
-        seg_clean = re.sub(r"[^a-z0-9]", "", (seg.get("text") or "").lower())
-        if s_clean in seg_clean or seg_clean in s_clean:
-            return seg
+        seg_tokens = set(re.findall(r"[a-z0-9]+", (seg.get("text") or "").lower()))
+        if not seg_tokens:
+            continue
+        intersection = s_tokens & seg_tokens
+        overlap = len(intersection) / max(len(s_tokens), 1)
+        if overlap > best_overlap:
+            best_overlap = overlap
+            best_seg = seg
+    if best_overlap >= 0.35:
+        return best_seg
     return None
 
 
@@ -218,6 +231,15 @@ def extract_action_items(
             continue
         if len(stripped.split()) > 24:
             continue
+        # Decisions should not be captured as action items
+        if DECISION_STRONG_PATTERN.search(stripped) and any(
+            stripped.lower().startswith(p) for p in [
+                "approved", "we decide", "we decided", "we agree", "we agreed",
+                "it was decided", "it is decided", "agreed"
+            ]
+        ):
+            continue
+
         matched_rule = False
         for pattern_idx, pattern in enumerate(ACTION_PATTERNS):
             match = pattern.match(stripped)
@@ -235,6 +257,7 @@ def extract_action_items(
             matched_seg = _find_segment_for_sentence(stripped, segments)
             seg_speaker = matched_seg.get("speaker") if matched_seg else None
             seg_start = matched_seg.get("start") if matched_seg else None
+            seg_id = matched_seg.get("id") if matched_seg else ""
             time_str = f"{int(float(seg_start) // 60):02d}:{int(float(seg_start) % 60):02d}" if seg_start is not None else ""
 
             lower_person = detected_person.lower()
@@ -272,6 +295,7 @@ def extract_action_items(
                     "person": detected_person or "Unassigned",
                     "deadline": deadline,
                     "time": time_str,
+                    "seg_id": seg_id,
                     "notes": notes,
                     "confidence": _estimate_action_confidence(stripped, detected_person or "Unassigned", match.group("deadline")),
                 }
@@ -285,6 +309,7 @@ def extract_action_items(
                 matched_seg = _find_segment_for_sentence(stripped, segments)
                 seg_speaker = matched_seg.get("speaker") if matched_seg else None
                 seg_start = matched_seg.get("start") if matched_seg else None
+                seg_id = matched_seg.get("id") if matched_seg else ""
                 time_str = f"{int(float(seg_start) // 60):02d}:{int(float(seg_start) % 60):02d}" if seg_start is not None else ""
                 person = seg_speaker if (seg_speaker and seg_speaker != "Unknown") else "Team"
                 action_items.append(
@@ -293,6 +318,7 @@ def extract_action_items(
                         "person": person,
                         "deadline": _extract_deadline(stripped, None),
                         "time": time_str,
+                        "seg_id": seg_id,
                         "notes": f"[{time_str}] {person}" if time_str else "Detected from action-oriented phrasing",
                         "confidence": _estimate_action_confidence(stripped, person, None) - 0.15,
                     }
@@ -372,17 +398,40 @@ def _extract_discussion_points(sentences: list[str], summary: str) -> list[str]:
     return discussion_points[:5] or ["No key discussion points detected."]
 
 
-def _extract_decisions(sentences: list[str]) -> list[str]:
-    decisions = [
-        sentence
-        for sentence in sentences
-        if len(sentence.split()) > 6
-        and len(sentence.split()) <= 30
-        and DECISION_STRONG_PATTERN.search(sentence)
-        and not VAGUE_DECISION_PATTERN.search(sentence)
-        and not ACTION_PATTERNS[0].match(sentence.strip())
-    ]
-    return decisions[:3] or ["No explicit decisions were detected."]
+def _extract_decisions(sentences: list[str], segments: list[dict] | None = None) -> list[str]:
+    decisions = []
+    seen = set()
+    for sentence in sentences:
+        stripped = sentence.strip()
+        if len(stripped.split()) < 4 or len(stripped.split()) > 35:
+            continue
+        if VAGUE_DECISION_PATTERN.search(stripped):
+            continue
+        if DECISION_STRONG_PATTERN.search(stripped) or any(
+            stripped.lower().startswith(p) for p in [
+                "approved", "we decide", "we decided", "we agree", "we agreed",
+                "it was decided", "it is decided", "agreed"
+            ]
+        ):
+            clean_dec = re.sub(r"^(approved|agreed)[.,]?\s*", "", stripped, flags=re.IGNORECASE).strip()
+            if not clean_dec:
+                clean_dec = stripped
+            clean_dec = clean_dec[0].upper() + clean_dec[1:]
+            key = clean_dec.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+
+            matched_seg = _find_segment_for_sentence(stripped, segments)
+            seg_speaker = matched_seg.get("speaker") if matched_seg else None
+            seg_start = matched_seg.get("start") if matched_seg else None
+            time_str = f"[{int(float(seg_start) // 60):02d}:{int(float(seg_start) % 60):02d}] " if seg_start is not None else ""
+            spk_str = f"{seg_speaker}: " if (seg_speaker and seg_speaker != "Unknown") else ""
+
+            decisions.append(f"{time_str}{spk_str}{clean_dec}")
+            if len(decisions) >= 3:
+                break
+    return decisions or ["No explicit decisions were detected."]
 
 
 def generate_mom(
@@ -404,7 +453,7 @@ def generate_mom(
         "participants": final_participants,
         "meeting_date": _extract_meeting_date(transcript),
         "discussion_points": _extract_discussion_points(sentences, summary),
-        "decisions": _extract_decisions(sentences),
+        "decisions": _extract_decisions(sentences, segments=segments),
         "action_items": action_items,
         "cleaned_transcript": cleaned_text,
     }

@@ -1,0 +1,506 @@
+{
+  "meeting_1_short": {
+    "meeting_name": "Meeting 1: Sprint Sync (3 Speakers, ~50s)",
+    "audio_file": "test_meeting_3speakers.mp3",
+    "attendees": [
+      "Sarah",
+      "George",
+      "Ravi"
+    ],
+    "latencies": {
+      "fast_mode_seconds": 18.85,
+      "smart_synthesis_seconds": 4.78,
+      "smart_mode_total_seconds": 23.62
+    },
+    "acoustic_clustering": {
+      "accuracy_percent": 62.5,
+      "cluster_mapping": {
+        "Speaker 1": "Sarah",
+        "Speaker 2": "George",
+        "Speaker 3": "Ravi"
+      },
+      "turns_evaluated": 8,
+      "segment_eval": [
+        {
+          "start": 0.0,
+          "end": 7.84,
+          "assigned_cluster": "Speaker 1",
+          "true_speaker": "Sarah",
+          "text": "Good morning, team. Let's do our release readiness"
+        },
+        {
+          "start": 7.84,
+          "end": 14.48,
+          "assigned_cluster": "Speaker 2",
+          "true_speaker": "George",
+          "text": "I've been looking into it. Users are experiencing "
+        },
+        {
+          "start": 15.44,
+          "end": 22.64,
+          "assigned_cluster": "Speaker 2",
+          "true_speaker": "Ravi",
+          "text": "I confirmed the issue during QA testing. We have a"
+        },
+        {
+          "start": 23.68,
+          "end": 28.0,
+          "assigned_cluster": "Speaker 2",
+          "true_speaker": "George",
+          "text": "I'll take ownership of the permanent login patch a"
+        },
+        {
+          "start": 28.96,
+          "end": 35.52,
+          "assigned_cluster": "Speaker 1",
+          "true_speaker": "Sarah",
+          "text": "Approved. We decide to deploy the temporary workar"
+        },
+        {
+          "start": 36.56,
+          "end": 40.64,
+          "assigned_cluster": "Speaker 2",
+          "true_speaker": "Ravi",
+          "text": "I will notify the customer support team about the "
+        },
+        {
+          "start": 41.76,
+          "end": 47.2,
+          "assigned_cluster": "Speaker 1",
+          "true_speaker": "Sarah",
+          "text": "Excellent. Ravi handles support notifications, Geo"
+        },
+        {
+          "start": 48.16,
+          "end": 51.92,
+          "assigned_cluster": "Speaker 3",
+          "true_speaker": "Sarah",
+          "text": "Let's wrap up."
+        }
+      ]
+    },
+    "active_model": "gemma3:1b",
+    "fast_mom": {
+      "participants": [
+        "George",
+        "Ravi",
+        "Sarah",
+        "Speaker 1"
+      ],
+      "meeting_date": null,
+      "discussion_points": [
+        "What is the status of the authentication bug?",
+        "We have a temporary workaround, but the permanent fix will take two days",
+        "I'll take ownership of the permanent login patch and complete it by Friday at 5 PM",
+        "I will notify the customer support team about the known issue by 2 PM"
+      ],
+      "decisions": [
+        "[00:15] Speaker 2: I confirmed the issue during QA testing",
+        "[00:15] Speaker 2: We have a temporary workaround, but the permanent fix will take two days",
+        "[00:28] Speaker 1: We decide to deploy the temporary workaround today, and George will release the permanent patch Friday"
+      ],
+      "action_items": [
+        {
+          "task": "Take ownership of the permanent login patch and complete it",
+          "person": "Speaker 2",
+          "deadline": "Friday at 5 PM",
+          "time": "00:23",
+          "seg_id": "whisper-4",
+          "notes": "[00:23] Speaker 2",
+          "confidence": 0.8
+        },
+        {
+          "task": "Notify the customer support team about the known issue",
+          "person": "Speaker 2",
+          "deadline": "2 PM",
+          "time": "00:36",
+          "seg_id": "whisper-6",
+          "notes": "[00:36] Speaker 2",
+          "confidence": 0.95
+        }
+      ],
+      "cleaned_transcript": "Good morning, team. Let's do our release readiness review. What is the status of the authentication bug? I've been looking into it. Users are experiencing login failures due to an expired token management issue. I confirmed the issue during QA testing. We have a temporary workaround, but the permanent fix will take two days. I'll take ownership of the permanent login patch and complete it by Friday at 5 PM. Approved. We decide to deploy the temporary workaround today, and George will release the permanent patch Friday. I will notify the customer support team about the known issue by 2 PM. today. Excellent. Ravi handles support notifications, George patches login by Friday. Let's wrap up.",
+      "overview": "Good morning, team Let's do our release readiness review What is the status of the authentication bug? I've been looking into it Users are experiencing login failures due to an expired token management issue I confirmed the issue during QA testing. We have a temporary workaround, but the permanent fix will take two days I'll take ownership of the permanent login patch and complete it by Friday at 5 PM. Approved.",
+      "next_steps": [
+        "Take ownership of the permanent login patch and complete it",
+        "Notify the customer support team about the known issue"
+      ],
+      "title": "VoxIntel Optimized Meeting Report"
+    },
+    "smart_mom": {
+      "participants": [
+        "Sarah",
+        "George",
+        "Ravi"
+      ],
+      "overview": "The meeting focused on addressing a login bug discovered during QA testing. A temporary workaround was established, with a two-day permanent fix planned for George. Customer support was notified, and George will finalize the permanent patch by Friday at 5:00 PM.",
+      "discussion_points": [
+        "The authentication bug was identified during QA testing.",
+        "A temporary workaround was implemented, with a two-day permanent fix anticipated.",
+        "George was assigned to complete the permanent login patch by Friday at 5:00 PM.",
+        "I will notify the customer support team about the known issue by 2 PM"
+      ],
+      "decisions": [
+        "George was tasked with completing the permanent login patch by Friday at 5:00 PM.",
+        "[00:15] Speaker 2: We have a temporary workaround, but the permanent fix will take two days",
+        "[00:28] Speaker 1: We decide to deploy the temporary workaround today, and George will release the permanent patch Friday"
+      ],
+      "action_items": [
+        {
+          "task": "Take ownership of the permanent login patch and complete it",
+          "person": "George",
+          "deadline": "Friday at 5 PM",
+          "time": "00:23",
+          "notes": "[00:23] Speaker 2",
+          "confidence": 0.8
+        },
+        {
+          "task": "Customer support was notified about the known issue by 2:00 PM.",
+          "person": "George",
+          "deadline": "2 PM",
+          "time": "00:36",
+          "notes": "[00:36] Speaker 2",
+          "confidence": 0.95
+        }
+      ],
+      "risks": [],
+      "next_steps": [],
+      "title": "Meeting Minutes: Authentication Bug Review",
+      "active_model": "gemma3:1b"
+    },
+    "ground_truth": {
+      "decisions": [
+        "Deploy the temporary authentication workaround today",
+        "Release the permanent login patch on Friday"
+      ],
+      "action_items": [
+        {
+          "speaker": "George",
+          "task": "Take ownership of the permanent login patch and complete it",
+          "deadline": "Friday at 5 PM"
+        },
+        {
+          "speaker": "Ravi",
+          "task": "Notify the customer support team about the known issue",
+          "deadline": "2 PM today"
+        }
+      ]
+    }
+  },
+  "meeting_2_heldout": {
+    "meeting_name": "Meeting 2: Held-Out Platform Sync (4 Speakers, ~3.2m)",
+    "audio_file": "test_meeting_long_4speakers.mp3",
+    "attendees": [
+      "Elena",
+      "Marcus",
+      "Kavita",
+      "David"
+    ],
+    "latencies": {
+      "fast_mode_seconds": 15.15,
+      "smart_synthesis_seconds": 5.5,
+      "smart_mode_total_seconds": 20.65
+    },
+    "acoustic_clustering": {
+      "accuracy_percent": 91.7,
+      "cluster_mapping": {
+        "Speaker 1": "Elena",
+        "Speaker 2": "David",
+        "Speaker 3": "Marcus",
+        "Speaker 4": "Kavita"
+      },
+      "turns_evaluated": 12,
+      "segment_eval": [
+        {
+          "start": 0.0,
+          "end": 30.0,
+          "assigned_cluster": "Speaker 1",
+          "true_speaker": "Elena",
+          "text": "Good morning, everyone. Welcome to our quarterly p"
+        },
+        {
+          "start": 30.0,
+          "end": 60.0,
+          "assigned_cluster": "Speaker 3",
+          "true_speaker": "Marcus",
+          "text": "The pause is missing indexes on the audit log tabl"
+        },
+        {
+          "start": 60.0,
+          "end": 83.0,
+          "assigned_cluster": "Speaker 1",
+          "true_speaker": "Kavita",
+          "text": "Kavita, what is your proposed timeline for deployi"
+        },
+        {
+          "start": 83.0,
+          "end": 95.0,
+          "assigned_cluster": "Speaker 3",
+          "true_speaker": "Marcus",
+          "text": "Regarding the customer dashboard redesign, our fro"
+        },
+        {
+          "start": 95.0,
+          "end": 106.0,
+          "assigned_cluster": "Speaker 4",
+          "true_speaker": "Kavita",
+          "text": "The GraphQL schema definition is ready. I will pub"
+        },
+        {
+          "start": 106.0,
+          "end": 125.0,
+          "assigned_cluster": "Speaker 3",
+          "true_speaker": "Marcus",
+          "text": "Perfect. Once that schema is published, I'll integ"
+        },
+        {
+          "start": 125.0,
+          "end": 131.0,
+          "assigned_cluster": "Speaker 1",
+          "true_speaker": "Elena",
+          "text": "Good catch. David, what is needed to clear those v"
+        },
+        {
+          "start": 131.0,
+          "end": 145.0,
+          "assigned_cluster": "Speaker 2",
+          "true_speaker": "David",
+          "text": "I will run a full security vulnerability audit on "
+        },
+        {
+          "start": 145.0,
+          "end": 157.0,
+          "assigned_cluster": "Speaker 1",
+          "true_speaker": "Elena",
+          "text": "Excellent. Let's address our third topic, worth tw"
+        },
+        {
+          "start": 157.0,
+          "end": 168.0,
+          "assigned_cluster": "Speaker 2",
+          "true_speaker": "David",
+          "text": "Legacy authentication has already been deprecated "
+        },
+        {
+          "start": 168.0,
+          "end": 180.0,
+          "assigned_cluster": "Speaker 1",
+          "true_speaker": "Elena",
+          "text": "Agreed. I will draft the official customer migrati"
+        },
+        {
+          "start": 180.0,
+          "end": 192.0,
+          "assigned_cluster": "Speaker 1",
+          "true_speaker": "Elena",
+          "text": "Database maintenance is set for Wednesday, API sch"
+        }
+      ]
+    },
+    "active_model": "gemma3:1b",
+    "fast_mom": {
+      "participants": [
+        "David",
+        "Elena",
+        "Kavita",
+        "Marcus",
+        "Speaker 1"
+      ],
+      "meeting_date": null,
+      "discussion_points": [
+        "Today, we need to address database query latency, the customer dashboard redesign, and the new or worth-to security migration",
+        "From the QA perspective, we reproduced the timeout on the staging environment under a simulated load of 2,000 concurrent requests",
+        "I will publish the updated API schema documentation to the developer portal by Thursday at 12 PM",
+        "Before we push the new dashboard to production, security must review the third-party charting libraries",
+        "I will draft the official customer migration announcement and publish it to the product blog by Friday at 4 PM"
+      ],
+      "decisions": [
+        "[01:00] Speaker 1: We decide to schedule the database maintenance window for Wednesday night at 11 PM",
+        "[02:37] Speaker 2: We decide to enforce mandatory OAuth two authentication on all production endpoints starting the first of next month"
+      ],
+      "action_items": [
+        {
+          "task": "Add the composite database indexes and optimize connection pool parameters",
+          "person": "Speaker 1",
+          "deadline": "Wednesday at 3 PM",
+          "time": "01:00",
+          "seg_id": "whisper-3",
+          "notes": "[01:00] Speaker 1",
+          "confidence": 0.95
+        },
+        {
+          "task": "Publish the updated API schema documentation to the developer portal",
+          "person": "Speaker 4",
+          "deadline": "Thursday at 12 PM",
+          "time": "01:35",
+          "seg_id": "whisper-5",
+          "notes": "[01:35] Speaker 4",
+          "confidence": 0.95
+        },
+        {
+          "task": "Integrate the new dashboard widgets and finale eyes front-end responsive testing",
+          "person": "Speaker 3",
+          "deadline": "next Monday at 5 PM",
+          "time": "01:46",
+          "seg_id": "whisper-6",
+          "notes": "[01:46] Speaker 3",
+          "confidence": 0.8
+        },
+        {
+          "task": "Run a full security vulnerability audit",
+          "person": "Speaker 2",
+          "deadline": "front-end dependencies and share the remediation report by Friday at 2 PM",
+          "time": "02:11",
+          "seg_id": "whisper-8",
+          "notes": "[02:11] Speaker 2",
+          "confidence": 0.95
+        },
+        {
+          "task": "Upgrade the vulnerable charting dependencies to their latest patched versions",
+          "person": "Speaker 2",
+          "deadline": "David shares the audit report",
+          "time": "02:11",
+          "seg_id": "whisper-8",
+          "notes": "[02:11] Speaker 2",
+          "confidence": 0.95
+        },
+        {
+          "task": "Draft the official customer migration announcement and publish it to the product blog",
+          "person": "Speaker 1",
+          "deadline": "Friday at 4 PM",
+          "time": "02:48",
+          "seg_id": "whisper-11",
+          "notes": "[02:48] Speaker 1",
+          "confidence": 0.95
+        }
+      ],
+      "cleaned_transcript": "Good morning, everyone. Welcome to our quarterly platform synchronization meeting. Today, we need to address database query latency, the customer dashboard redesign, and the new or worth-to security migration. Let's start with the database performance issues reported in production. Thanks, Elena. Over the weekend, query latency spiked to 800 ms during peak traffic. The pause is missing indexes on the audit log table and inefficient connection pooling in our microservices. That latency directly impacted the web dashboard. Use the sessions were timing out while loading recent order histories, causing multiple client complaints. From the QA perspective, we reproduced the timeout on the staging environment under a simulated load of 2,000 concurrent requests. We need both an immediate database index patch and query optimization. Kavita, what is your proposed timeline for deploying the database fix to production? I will add the composite database indexes and optimize connection pool parameters by Wednesday at 3 PM. Approved. We decide to schedule the database maintenance window for Wednesday night at 11 PM. to minimize user impact. Regarding the customer dashboard redesign, our front-end team has finished the initial mockups and responsive layout components. However, we are waiting for the updated API schemers from back end. The GraphQL schema definition is ready. I will publish the updated API schema documentation to the developer portal by Thursday at 12 PM. Perfect. Once that schema is published, I'll integrate the new dashboard widgets and finale eyes front-end responsive testing by next Monday at 5 PM. Before we push the new dashboard to production, security must review the third-party charting libraries. We detected two updated dependencies with reported vulnerabilities. Good catch. David, what is needed to clear those vulnerabilities? I will run a full security vulnerability audit on front-end dependencies and share the remediation report by Friday at 2 PM. I will upgrade the vulnerable charting dependencies to their latest patched versions as soon as David shares the audit report. Excellent. Let's address our third topic, worth two migration. David, what is our status on deprecating legacy basic authentication? Legacy authentication has already been deprecated on staging. We decide to enforce mandatory OAuth two authentication on all production endpoints starting the first of next month. Agreed. I will draft the official customer migration announcement and publish it to the product blog by Friday at 4 PM. Great progress to day team. Database maintenance is set for Wednesday, API schemers on Thursday, security audit and blog post on Friday and dashboard integration by Monday. Let's adjourn.",
+      "overview": "The pause is missing indexes on the audit log table and inefficient connection pooling in our microservices That latency directly impacted the web dashboard Use the sessions were. Timing out while loading recent order histories, causing multiple client complaints. From the QA perspective, we reproduced the timeout on the staging environment under a simulated load of. 2,000 concurrent requests We need both an immediate database index patch and query optimization Kavita, what is your proposed timeline for deploying the database. Fix to production?. To minimize user impact Regarding the customer dashboard redesign, our front-end team has finished the initial mockups and responsive layout components.",
+      "next_steps": [
+        "Add the composite database indexes and optimize connection pool parameters",
+        "Publish the updated API schema documentation to the developer portal",
+        "Integrate the new dashboard widgets and finale eyes front-end responsive testing",
+        "Run a full security vulnerability audit"
+      ],
+      "title": "VoxIntel Optimized Meeting Report"
+    },
+    "smart_mom": {
+      "participants": [
+        "Elena",
+        "Marcus",
+        "Kavita",
+        "David"
+      ],
+      "overview": "The meeting focused on addressing database performance issues, redesigning the customer dashboard, and strengthening security migration strategies.",
+      "discussion_points": [
+        "Today, we need to address database query latency, the customer dashboard redesign, and the new or worth-to security migration",
+        "From the QA perspective, we reproduced the timeout on the staging environment under a simulated load of 2,000 concurrent requests",
+        "I will publish the updated API schema documentation to the developer portal by Thursday at 12 PM",
+        "Before we push the new dashboard to production, security must review the third-party charting libraries",
+        "I will draft the official customer migration announcement and publish it to the product blog by Friday at 4 PM"
+      ],
+      "decisions": [
+        "Database maintenance window scheduled for Wednesday night at 11 PM.",
+        "Mandatory OAuth two authentication implemented on production endpoints starting the first of next month."
+      ],
+      "action_items": [
+        {
+          "task": "Composite database indexes and connection pool parameters were added to the database.",
+          "person": "Speaker 1",
+          "deadline": "Wednesday at 3 PM",
+          "time": "01:00",
+          "notes": "[01:00] Speaker 1",
+          "confidence": 0.95
+        },
+        {
+          "task": "API schema documentation was published to the developer portal.",
+          "person": "Speaker 4",
+          "deadline": "Thursday at 12 PM",
+          "time": "01:35",
+          "notes": "[01:35] Speaker 4",
+          "confidence": 0.95
+        },
+        {
+          "task": "Dashboard widget integration and front-end responsive testing were scheduled.",
+          "person": "Speaker 3",
+          "deadline": "next Monday at 5 PM",
+          "time": "01:46",
+          "notes": "[01:46] Speaker 3",
+          "confidence": 0.8
+        },
+        {
+          "task": "Security vulnerability audit of third-party charting libraries was initiated.",
+          "person": "David",
+          "deadline": "front-end dependencies and share the remediation report by Friday at 2 PM",
+          "time": "02:11",
+          "notes": "[02:11] Speaker 2",
+          "confidence": 0.95
+        },
+        {
+          "task": "Customer migration announcement and publication to the product blog were planned.",
+          "person": "David",
+          "deadline": "David shares the audit report",
+          "time": "02:11",
+          "notes": "[02:11] Speaker 2",
+          "confidence": 0.95
+        }
+      ],
+      "risks": [],
+      "next_steps": [],
+      "title": "Quarterly Platform Synchronization Meeting",
+      "active_model": "gemma3:1b"
+    },
+    "ground_truth": {
+      "decisions": [
+        {
+          "speaker": "Elena",
+          "decision": "Schedule the database maintenance window for Wednesday night at 11 PM",
+          "turn": 7
+        },
+        {
+          "speaker": "David",
+          "decision": "Enforce mandatory OAuth two authentication on all production endpoints starting the first of next month",
+          "turn": 16
+        }
+      ],
+      "action_items": [
+        {
+          "speaker": "Kavita",
+          "task": "Add composite database indexes and optimize connection pool parameters",
+          "deadline": "Wednesday at 3 PM",
+          "turn": 6
+        },
+        {
+          "speaker": "Kavita",
+          "task": "Publish the updated API schema documentation to the developer portal",
+          "deadline": "Thursday at 12 PM",
+          "turn": 9
+        },
+        {
+          "speaker": "Marcus",
+          "task": "Integrate the new dashboard widgets and finalize frontend responsive testing",
+          "deadline": "next Monday at 5 PM",
+          "turn": 10
+        },
+        {
+          "speaker": "David",
+          "task": "Run a full security vulnerability audit on frontend dependencies and share the remediation report",
+          "deadline": "Friday at 2 PM",
+          "turn": 13
+        },
+        {
+          "speaker": "Marcus",
+          "task": "Upgrade the vulnerable charting dependencies to their latest patched versions",
+          "deadline": "as soon as David shares the audit report",
+          "turn": 14
+        },
+        {
+          "speaker": "Elena",
+          "task": "Draft the official customer migration announcement and publish it to the product blog",
+          "deadline": "Friday at 4 PM",
+          "turn": 17
+        }
+      ]
+    }
+  }
+}
