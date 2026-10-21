@@ -241,5 +241,7 @@
         "turn": 17
       }
     ]
-  }
+  },
+  "dataset_type": "dev set",
+  "reference_summary": "The platform engineering team met to resolve database query latency, review customer dashboard redesign mockups, and plan OAuth 2.0 migration. Elena approved scheduling a database maintenance window for Wednesday night at 11 PM, and David confirmed mandatory OAuth 2.0 enforcement starting next month. Action items were assigned: Kavita to apply composite database indexes by Wednesday at 3 PM and publish GraphQL schemas by Thursday at 12 PM; Marcus to integrate dashboard widgets by Monday at 5 PM and upgrade charting libraries; David to conduct a security vulnerability audit by Friday at 2 PM; and Elena to publish the customer migration announcement by Friday at 4 PM."
 }

@@ -1,0 +1,333 @@
+/*
+   VOXINTEL DESIGN SYSTEM: "AUDIO CONSOLE MEETS EDITORIAL"
+   Studio mixing console meets printed executive brief.
+*/
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --bg-deep: #0E0F12;
+  --surface-1: #16181D;
+  --surface-2: #1E2128;
+  --border-hairline: #2A2E37;
+  --text-primary: #ECE8E1;
+  --text-secondary: #9AA0AB;
+  --accent-amber: #FFB020;
+  --accent-amber-glow: rgba(255, 176, 32, 0.15);
+  --semantic-green: #7BD389;
+  --semantic-red: #F07178;
+
+  --spk-0: #4EA8DE;
+  --spk-1: #F2A65A;
+  --spk-2: #7BD389;
+  --spk-3: #C792EA;
+  --spk-4: #F07178;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+}
+
+/* Global App Container */
+.stApp {
+  background-color: var(--bg-deep) !important;
+  color: var(--text-primary) !important;
+  font-family: var(--font-ui) !important;
+}
+
+/* Base typography */
+h1, h2, h3, .brand-title {
+  font-family: var(--font-display) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em !important;
+  color: var(--text-primary) !important;
+}
+
+p, span, label, div {
+  font-family: var(--font-ui);
+}
+
+code, .mono-text, .mono-stat {
+  font-family: var(--font-mono) !important;
+}
+
+/* Top App Header: Slim Wordmark + CSS Animated Waveform */
+.vox-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0 1.25rem 0;
+  border-bottom: 1px solid var(--border-hairline);
+  margin-bottom: 1.5rem;
+}
+
+.vox-wordmark {
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.vox-waveform {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 18px;
+}
+
+.vox-waveform span {
+  display: block;
+  width: 3px;
+  background-color: var(--accent-amber);
+  border-radius: 1px;
+  animation: wave 1.2s ease-in-out infinite alternate;
+}
+
+.vox-waveform span:nth-child(1) { height: 6px; animation-delay: 0.0s; }
+.vox-waveform span:nth-child(2) { height: 14px; animation-delay: 0.2s; }
+.vox-waveform span:nth-child(3) { height: 18px; animation-delay: 0.4s; }
+.vox-waveform span:nth-child(4) { height: 10px; animation-delay: 0.1s; }
+.vox-waveform span:nth-child(5) { height: 8px; animation-delay: 0.3s; }
+
+@keyframes wave {
+  0% { transform: scaleY(0.4); opacity: 0.6; }
+  100% { transform: scaleY(1.0); opacity: 1; }
+}
+
+/* Sidebar styling */
+section[data-testid="stSidebar"] {
+  background-color: var(--surface-1) !important;
+  border-right: 1px solid var(--border-hairline) !important;
+}
+
+.sidebar-group-title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin: 1.2rem 0 0.4rem 0;
+}
+
+/* 3-Step Processing State Tracker */
+.tracker-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-1);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.tracker-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.tracker-step.active {
+  color: var(--accent-amber);
+  font-weight: 600;
+}
+
+.tracker-step.completed {
+  color: var(--semantic-green);
+}
+
+.tracker-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+}
+
+.tracker-step.active .tracker-dot {
+  background: var(--accent-amber);
+  box-shadow: 0 0 8px var(--accent-amber);
+}
+
+.tracker-step.completed .tracker-dot {
+  background: var(--semantic-green);
+}
+
+/* Inline Stat Row */
+.stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.70rem;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--accent-amber);
+}
+
+/* Empty State Dashed Drop Zone */
+.empty-drop-zone {
+  border: 1px dashed var(--border-hairline);
+  border-radius: var(--radius-md);
+  background: var(--surface-1);
+  padding: 3rem 2rem;
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.empty-drop-zone p {
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  margin-bottom: 1rem;
+}
+
+/* Executive Summary readable column (max 70ch) */
+.editorial-summary {
+  max-width: 70ch;
+  line-height: 1.65;
+  font-size: 1.02rem;
+  color: var(--text-primary);
+  margin-bottom: 1.75rem;
+}
+
+/* Speaker Chips */
+.speaker-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--surface-2);
+  border: 1px solid var(--border-hairline);
+}
+
+.speaker-chip.spk-0 { color: var(--spk-0); border-color: rgba(78, 168, 222, 0.4); }
+.speaker-chip.spk-1 { color: var(--spk-1); border-color: rgba(242, 166, 90, 0.4); }
+.speaker-chip.spk-2 { color: var(--spk-2); border-color: rgba(123, 211, 137, 0.4); }
+.speaker-chip.spk-3 { color: var(--spk-3); border-color: rgba(199, 146, 234, 0.4); }
+.speaker-chip.spk-4 { color: var(--spk-4); border-color: rgba(240, 113, 120, 0.4); }
+
+/* Compact Tables */
+.compact-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  margin-bottom: 1.5rem;
+}
+
+.compact-table th {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.compact-table td {
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid var(--border-hairline);
+  color: var(--text-primary);
+}
+
+.mono-time {
+  font-family: var(--font-mono);
+  color: var(--accent-amber);
+  font-weight: 500;
+}
+
+.muted-deadline-tag {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+}
+
+/* Transcript Row */
+.transcript-turn {
+  display: flex;
+  gap: 0.85rem;
+  padding: 0.65rem 0.85rem;
+  border-left: 3px solid var(--border-hairline);
+  background: var(--surface-1);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin-bottom: 0.5rem;
+  transition: background-color 150ms ease;
+}
+
+.transcript-turn:hover {
+  background: var(--surface-2);
+}
+
+.transcript-turn.spk-0 { border-left-color: var(--spk-0); }
+.transcript-turn.spk-1 { border-left-color: var(--spk-1); }
+.transcript-turn.spk-2 { border-left-color: var(--spk-2); }
+.transcript-turn.spk-3 { border-left-color: var(--spk-3); }
+.transcript-turn.spk-4 { border-left-color: var(--spk-4); }
+
+.transcript-text {
+  flex: 1;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+/* Button & Controls Styling */
+button[kind="primary"] {
+  background-color: var(--accent-amber) !important;
+  color: #0E0F12 !important;
+  font-weight: 600 !important;
+  border: none !important;
+  border-radius: var(--radius-md) !important;
+  transition: background-color 150ms ease !important;
+}
+
+button[kind="primary"]:hover {
+  background-color: #E59D1C !important;
+}
+
+button[kind="secondary"] {
+  background-color: var(--surface-2) !important;
+  border: 1px solid var(--border-hairline) !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--radius-md) !important;
+  transition: border-color 150ms ease !important;
+}
+
+button[kind="secondary"]:hover {
+  border-color: var(--accent-amber) !important;
+}

@@ -88,5 +88,7 @@
         "deadline": "2 PM today"
       }
     ]
-  }
+  },
+  "dataset_type": "dev set",
+  "reference_summary": "The team held a release readiness review to address user login failures caused by an expired token management issue. Sarah approved deploying a temporary workaround today while George committed to completing the permanent login patch by Friday at 5 PM. Ravi confirmed the issue in QA testing and took the action item to notify the customer support team by 2 PM."
 }

@@ -1,0 +1,1192 @@
+{
+  "metadata": {
+    "evaluation_date": "2026-10-21 21:08:59",
+    "active_ollama_model": "gemma3:1b",
+    "ollama_host": "http://127.0.0.1:11434"
+  },
+  "meetings": {
+    "meeting_1": {
+      "name": "Meeting 1: Sprint Sync",
+      "type": "dev set",
+      "duration_seconds": 49.97,
+      "asr_benchmarks": [
+        {
+          "model_size": "tiny",
+          "with_initial_prompt": false,
+          "label": "tiny (no prompt)",
+          "wer": 0.0783,
+          "median_latency_seconds": 2.17,
+          "median_cpu_percent": 382.7,
+          "median_ram_mb": 488.2,
+          "latencies_3_runs": [
+            2.22,
+            2.17,
+            2.16
+          ]
+        },
+        {
+          "model_size": "tiny",
+          "with_initial_prompt": true,
+          "label": "tiny (with prompt)",
+          "wer": 0.0522,
+          "median_latency_seconds": 2.26,
+          "median_cpu_percent": 377.6,
+          "median_ram_mb": 491.3,
+          "latencies_3_runs": [
+            2.26,
+            2.37,
+            2.21
+          ]
+        },
+        {
+          "model_size": "base",
+          "with_initial_prompt": false,
+          "label": "base (no prompt)",
+          "wer": 0.0783,
+          "median_latency_seconds": 5.09,
+          "median_cpu_percent": 385.4,
+          "median_ram_mb": 594.9,
+          "latencies_3_runs": [
+            5.58,
+            5.03,
+            5.09
+          ]
+        },
+        {
+          "model_size": "base",
+          "with_initial_prompt": true,
+          "label": "base (with prompt)",
+          "wer": 0.0348,
+          "median_latency_seconds": 6.17,
+          "median_cpu_percent": 383.9,
+          "median_ram_mb": 594.9,
+          "latencies_3_runs": [
+            6.17,
+            6.69,
+            5.46
+          ]
+        }
+      ],
+      "pipeline_latencies": {
+        "fast_mode_seconds": 12.63,
+        "smart_synthesis_seconds": 9.01,
+        "total_smart_seconds": 21.64
+      },
+      "speaker_attribution": {
+        "clustering_only_remap_true": {
+          "accuracy": 0.63,
+          "macro_precision": 0.3717,
+          "macro_recall": 0.4257,
+          "macro_f1": 0.387,
+          "micro_precision": 0.63,
+          "micro_recall": 0.63,
+          "micro_f1": 0.63,
+          "weighted_precision": 0.5965,
+          "weighted_recall": 0.63,
+          "weighted_f1": 0.5998,
+          "labels": [
+            "George",
+            "Ravi",
+            "Sarah",
+            "Unknown"
+          ],
+          "confusion_matrix": [
+            [
+              0,
+              22,
+              1,
+              3
+            ],
+            [
+              0,
+              23,
+              0,
+              4
+            ],
+            [
+              3,
+              0,
+              40,
+              4
+            ],
+            [
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        "grounding_on": {
+          "accuracy": 0.0,
+          "macro_precision": 0.0,
+          "macro_recall": 0.0,
+          "macro_f1": 0.0,
+          "micro_precision": 0.0,
+          "micro_recall": 0.0,
+          "micro_f1": 0.0,
+          "weighted_precision": 0.0,
+          "weighted_recall": 0.0,
+          "weighted_f1": 0.0,
+          "labels": [
+            "George",
+            "Ravi",
+            "Sarah",
+            "Speaker 1",
+            "Speaker 2",
+            "Speaker 3",
+            "Unknown"
+          ],
+          "confusion_matrix": [
+            [
+              0,
+              0,
+              0,
+              1,
+              22,
+              0,
+              3
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              23,
+              0,
+              4
+            ],
+            [
+              0,
+              0,
+              0,
+              40,
+              0,
+              3,
+              4
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      },
+      "action_items_evaluation": {
+        "fast_mode": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "true_positives": 2,
+          "false_positives": 0,
+          "false_negatives": 0
+        },
+        "smart_mode": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "true_positives": 2,
+          "false_positives": 0,
+          "false_negatives": 0
+        }
+      },
+      "summary_quality": {
+        "fast_key_moments": {
+          "rouge1": 0.4688,
+          "rouge2": 0.2526,
+          "rougeL": 0.3437,
+          "bleu": 0.1216,
+          "meteor": 0.5147,
+          "bertscore_f1": 0.2977,
+          "first_person_pronoun_count": 7,
+          "first_person_matches": [
+            "our",
+            "we",
+            "i"
+          ]
+        },
+        "smart_mom": {
+          "rouge1": 0.5655,
+          "rouge2": 0.3077,
+          "rougeL": 0.4552,
+          "bleu": 0.1651,
+          "meteor": 0.5352,
+          "bertscore_f1": 0.4826,
+          "first_person_pronoun_count": 0,
+          "first_person_matches": []
+        },
+        "fluency_proxy_perplexity": 53.48
+      },
+      "timestamp_error": {
+        "mae": 29.5,
+        "pairs_count": 2,
+        "note": "Fewer than 3 pairs; regression metrics skipped"
+      },
+      "fast_mom": {
+        "participants": [
+          "George",
+          "Ravi",
+          "Sarah",
+          "Speaker 1"
+        ],
+        "meeting_date": null,
+        "discussion_points": [
+          "What is the status of the authentication bug?",
+          "We have a temporary workaround, but the permanent fix will take two days",
+          "I'll take ownership of the permanent login patch and complete it by Friday at 5 PM",
+          "I will notify the customer support team about the known issue by 2 PM"
+        ],
+        "decisions": [
+          "[00:15] Speaker 2: I confirmed the issue during QA testing",
+          "[00:15] Speaker 2: We have a temporary workaround, but the permanent fix will take two days",
+          "[00:28] Speaker 1: We decide to deploy the temporary workaround today, and George will release the permanent patch Friday"
+        ],
+        "action_items": [
+          {
+            "task": "Take ownership of the permanent login patch and complete it",
+            "person": "Speaker 2",
+            "deadline": "Friday at 5 PM",
+            "time": "00:23",
+            "seg_id": "whisper-4",
+            "notes": "[00:23] Speaker 2",
+            "confidence": 0.8
+          },
+          {
+            "task": "Notify the customer support team about the known issue",
+            "person": "Speaker 2",
+            "deadline": "2 PM",
+            "time": "00:36",
+            "seg_id": "whisper-6",
+            "notes": "[00:36] Speaker 2",
+            "confidence": 0.95
+          }
+        ],
+        "cleaned_transcript": "Good morning, team. Let's do our release readiness review. What is the status of the authentication bug? I've been looking into it. Users are experiencing login failures due to an expired token management issue. I confirmed the issue during QA testing. We have a temporary workaround, but the permanent fix will take two days. I'll take ownership of the permanent login patch and complete it by Friday at 5 PM. Approved. We decide to deploy the temporary workaround today, and George will release the permanent patch Friday. I will notify the customer support team about the known issue by 2 PM. today. Excellent. Ravi handles support notifications, George patches login by Friday. Let's wrap up.",
+        "overview": "Good morning, team Let's do our release readiness review What is the status of the authentication bug? I've been looking into it Users are experiencing login failures due to an expired token management issue I confirmed the issue during QA testing. We have a temporary workaround, but the permanent fix will take two days I'll take ownership of the permanent login patch and complete it by Friday at 5 PM. Approved.",
+        "next_steps": [
+          "Take ownership of the permanent login patch and complete it",
+          "Notify the customer support team about the known issue"
+        ],
+        "title": "VoxIntel Optimized Meeting Report"
+      },
+      "smart_mom": {
+        "participants": [
+          "Sarah",
+          "George",
+          "Ravi"
+        ],
+        "overview": "The meeting focused on addressing a login bug impacting users. During QA testing, an issue was identified \u2013 users were experiencing login failures due to an expired token management problem. A temporary workaround was implemented, but a permanent fix was scheduled for two days. George was assigned to complete the permanent login patch by Friday at 5:00 PM. Ravi was tasked with notifying the customer support team regarding the known issue by 2:00 PM. The meeting concluded with the delegation of these responsibilities.",
+        "discussion_points": [
+          "The authentication bug was investigated during QA testing.",
+          "A temporary workaround was established for users.",
+          "George was responsible for completing the permanent login patch by Friday at 5:00 PM.",
+          "I will notify the customer support team about the known issue by 2 PM"
+        ],
+        "decisions": [
+          "George was assigned to complete the permanent login patch by Friday at 5:00 PM.",
+          "[00:15] Speaker 2: We have a temporary workaround, but the permanent fix will take two days",
+          "[00:28] Speaker 1: We decide to deploy the temporary workaround today, and George will release the permanent patch Friday"
+        ],
+        "action_items": [
+          {
+            "task": "Take ownership of the permanent login patch and complete it",
+            "person": "George",
+            "deadline": "Friday at 5 PM",
+            "time": "00:23",
+            "notes": "[00:23] Speaker 2",
+            "confidence": 0.8
+          },
+          {
+            "task": "Ravi notified the customer support team regarding the known issue by 2:00 PM.",
+            "person": "George",
+            "deadline": "2 PM",
+            "time": "00:36",
+            "notes": "[00:36] Speaker 2",
+            "confidence": 0.95
+          }
+        ],
+        "risks": [],
+        "next_steps": [],
+        "title": "Meeting Minutes: Authentication Bug Review",
+        "active_model": "gemma3:1b"
+      }
+    },
+    "meeting_2": {
+      "name": "Meeting 2: Platform Sync",
+      "type": "dev set",
+      "duration_seconds": 192.96,
+      "asr_benchmarks": [
+        {
+          "model_size": "tiny",
+          "with_initial_prompt": false,
+          "label": "tiny (no prompt)",
+          "wer": 0.1127,
+          "median_latency_seconds": 7.76,
+          "median_cpu_percent": 358.9,
+          "median_ram_mb": 529.0,
+          "latencies_3_runs": [
+            8.37,
+            7.67,
+            7.76
+          ]
+        },
+        {
+          "model_size": "tiny",
+          "with_initial_prompt": true,
+          "label": "tiny (with prompt)",
+          "wer": 0.0911,
+          "median_latency_seconds": 7.78,
+          "median_cpu_percent": 364.6,
+          "median_ram_mb": 528.4,
+          "latencies_3_runs": [
+            8.06,
+            7.78,
+            7.7
+          ]
+        },
+        {
+          "model_size": "base",
+          "with_initial_prompt": false,
+          "label": "base (no prompt)",
+          "wer": 0.0959,
+          "median_latency_seconds": 14.14,
+          "median_cpu_percent": 373.5,
+          "median_ram_mb": 618.9,
+          "latencies_3_runs": [
+            14.14,
+            14.67,
+            14.04
+          ]
+        },
+        {
+          "model_size": "base",
+          "with_initial_prompt": true,
+          "label": "base (with prompt)",
+          "wer": 0.0887,
+          "median_latency_seconds": 14.12,
+          "median_cpu_percent": 375.4,
+          "median_ram_mb": 619.5,
+          "latencies_3_runs": [
+            14.12,
+            14.19,
+            13.56
+          ]
+        }
+      ],
+      "pipeline_latencies": {
+        "fast_mode_seconds": 16.27,
+        "smart_synthesis_seconds": 11.25,
+        "total_smart_seconds": 27.53
+      },
+      "speaker_attribution": {
+        "clustering_only_remap_true": {
+          "accuracy": 0.7073,
+          "macro_precision": 0.607,
+          "macro_recall": 0.5086,
+          "macro_f1": 0.5049,
+          "micro_precision": 0.7073,
+          "micro_recall": 0.7073,
+          "micro_f1": 0.7073,
+          "weighted_precision": 0.77,
+          "weighted_recall": 0.7073,
+          "weighted_f1": 0.6876,
+          "labels": [
+            "David",
+            "Elena",
+            "Kavita",
+            "Marcus",
+            "Unknown"
+          ],
+          "confusion_matrix": [
+            [
+              37,
+              0,
+              0,
+              44,
+              0
+            ],
+            [
+              1,
+              155,
+              0,
+              5,
+              1
+            ],
+            [
+              0,
+              35,
+              22,
+              14,
+              0
+            ],
+            [
+              12,
+              1,
+              0,
+              59,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        "grounding_on": {
+          "accuracy": 0.0,
+          "macro_precision": 0.0,
+          "macro_recall": 0.0,
+          "macro_f1": 0.0,
+          "micro_precision": 0.0,
+          "micro_recall": 0.0,
+          "micro_f1": 0.0,
+          "weighted_precision": 0.0,
+          "weighted_recall": 0.0,
+          "weighted_f1": 0.0,
+          "labels": [
+            "David",
+            "Elena",
+            "Kavita",
+            "Marcus",
+            "Speaker 1",
+            "Speaker 2",
+            "Speaker 3",
+            "Speaker 4",
+            "Unknown"
+          ],
+          "confusion_matrix": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              37,
+              44,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              155,
+              1,
+              5,
+              0,
+              1
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              35,
+              0,
+              14,
+              22,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              1,
+              12,
+              59,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      },
+      "action_items_evaluation": {
+        "fast_mode": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "true_positives": 6,
+          "false_positives": 0,
+          "false_negatives": 0
+        },
+        "smart_mode": {
+          "precision": 1.0,
+          "recall": 0.8333,
+          "f1": 0.9091,
+          "true_positives": 5,
+          "false_positives": 0,
+          "false_negatives": 1
+        }
+      },
+      "summary_quality": {
+        "fast_key_moments": {
+          "rouge1": 0.3333,
+          "rouge2": 0.1311,
+          "rougeL": 0.1932,
+          "bleu": 0.0652,
+          "meteor": 0.2953,
+          "bertscore_f1": 0.0802,
+          "first_person_pronoun_count": 13,
+          "first_person_matches": [
+            "our",
+            "i",
+            "we"
+          ]
+        },
+        "smart_mom": {
+          "rouge1": 0.176,
+          "rouge2": 0.065,
+          "rougeL": 0.144,
+          "bleu": 0.0016,
+          "meteor": 0.0901,
+          "bertscore_f1": 0.1741,
+          "first_person_pronoun_count": 0,
+          "first_person_matches": []
+        },
+        "fluency_proxy_perplexity": 15.67
+      },
+      "timestamp_error": {
+        "mae": 13.5,
+        "pairs_count": 6,
+        "mse": 896.99,
+        "r2": -0.7126,
+        "pearson_r": 0.5721,
+        "spearman_rho": 0.5374
+      },
+      "fast_mom": {
+        "participants": [
+          "David",
+          "Elena",
+          "Kavita",
+          "Marcus",
+          "Speaker 1"
+        ],
+        "meeting_date": null,
+        "discussion_points": [
+          "Today, we need to address database query latency, the customer dashboard redesign, and the new or worth-to security migration",
+          "From the QA perspective, we reproduced the timeout on the staging environment under a simulated load of 2,000 concurrent requests",
+          "I will publish the updated API schema documentation to the developer portal by Thursday at 12 PM",
+          "Before we push the new dashboard to production, security must review the third-party charting libraries",
+          "I will draft the official customer migration announcement and publish it to the product blog by Friday at 4 PM"
+        ],
+        "decisions": [
+          "[01:00] Speaker 1: We decide to schedule the database maintenance window for Wednesday night at 11 PM",
+          "[02:37] Speaker 2: We decide to enforce mandatory OAuth two authentication on all production endpoints starting the first of next month"
+        ],
+        "action_items": [
+          {
+            "task": "Add the composite database indexes and optimize connection pool parameters",
+            "person": "Speaker 1",
+            "deadline": "Wednesday at 3 PM",
+            "time": "01:00",
+            "seg_id": "whisper-3",
+            "notes": "[01:00] Speaker 1",
+            "confidence": 0.95
+          },
+          {
+            "task": "Publish the updated API schema documentation to the developer portal",
+            "person": "Speaker 4",
+            "deadline": "Thursday at 12 PM",
+            "time": "01:35",
+            "seg_id": "whisper-5",
+            "notes": "[01:35] Speaker 4",
+            "confidence": 0.95
+          },
+          {
+            "task": "Integrate the new dashboard widgets and finale eyes front-end responsive testing",
+            "person": "Speaker 3",
+            "deadline": "next Monday at 5 PM",
+            "time": "01:46",
+            "seg_id": "whisper-6",
+            "notes": "[01:46] Speaker 3",
+            "confidence": 0.8
+          },
+          {
+            "task": "Run a full security vulnerability audit",
+            "person": "Speaker 2",
+            "deadline": "front-end dependencies and share the remediation report by Friday at 2 PM",
+            "time": "02:11",
+            "seg_id": "whisper-8",
+            "notes": "[02:11] Speaker 2",
+            "confidence": 0.95
+          },
+          {
+            "task": "Upgrade the vulnerable charting dependencies to their latest patched versions",
+            "person": "Speaker 2",
+            "deadline": "David shares the audit report",
+            "time": "02:11",
+            "seg_id": "whisper-8",
+            "notes": "[02:11] Speaker 2",
+            "confidence": 0.95
+          },
+          {
+            "task": "Draft the official customer migration announcement and publish it to the product blog",
+            "person": "Speaker 1",
+            "deadline": "Friday at 4 PM",
+            "time": "02:48",
+            "seg_id": "whisper-11",
+            "notes": "[02:48] Speaker 1",
+            "confidence": 0.95
+          }
+        ],
+        "cleaned_transcript": "Good morning, everyone. Welcome to our quarterly platform synchronization meeting. Today, we need to address database query latency, the customer dashboard redesign, and the new or worth-to security migration. Let's start with the database performance issues reported in production. Thanks, Elena. Over the weekend, query latency spiked to 800 ms during peak traffic. The pause is missing indexes on the audit log table and inefficient connection pooling in our microservices. That latency directly impacted the web dashboard. Use the sessions were timing out while loading recent order histories, causing multiple client complaints. From the QA perspective, we reproduced the timeout on the staging environment under a simulated load of 2,000 concurrent requests. We need both an immediate database index patch and query optimization. Kavita, what is your proposed timeline for deploying the database fix to production? I will add the composite database indexes and optimize connection pool parameters by Wednesday at 3 PM. Approved. We decide to schedule the database maintenance window for Wednesday night at 11 PM. to minimize user impact. Regarding the customer dashboard redesign, our front-end team has finished the initial mockups and responsive layout components. However, we are waiting for the updated API schemers from back end. The GraphQL schema definition is ready. I will publish the updated API schema documentation to the developer portal by Thursday at 12 PM. Perfect. Once that schema is published, I'll integrate the new dashboard widgets and finale eyes front-end responsive testing by next Monday at 5 PM. Before we push the new dashboard to production, security must review the third-party charting libraries. We detected two updated dependencies with reported vulnerabilities. Good catch. David, what is needed to clear those vulnerabilities? I will run a full security vulnerability audit on front-end dependencies and share the remediation report by Friday at 2 PM. I will upgrade the vulnerable charting dependencies to their latest patched versions as soon as David shares the audit report. Excellent. Let's address our third topic, worth two migration. David, what is our status on deprecating legacy basic authentication? Legacy authentication has already been deprecated on staging. We decide to enforce mandatory OAuth two authentication on all production endpoints starting the first of next month. Agreed. I will draft the official customer migration announcement and publish it to the product blog by Friday at 4 PM. Great progress to day team. Database maintenance is set for Wednesday, API schemers on Thursday, security audit and blog post on Friday and dashboard integration by Monday. Let's adjourn.",
+        "overview": "The pause is missing indexes on the audit log table and inefficient connection pooling in our microservices That latency directly impacted the web dashboard Use the sessions were. Timing out while loading recent order histories, causing multiple client complaints. From the QA perspective, we reproduced the timeout on the staging environment under a simulated load of. 2,000 concurrent requests We need both an immediate database index patch and query optimization Kavita, what is your proposed timeline for deploying the database. Fix to production?. To minimize user impact Regarding the customer dashboard redesign, our front-end team has finished the initial mockups and responsive layout components.",
+        "next_steps": [
+          "Add the composite database indexes and optimize connection pool parameters",
+          "Publish the updated API schema documentation to the developer portal",
+          "Integrate the new dashboard widgets and finale eyes front-end responsive testing",
+          "Run a full security vulnerability audit"
+        ],
+        "title": "VoxIntel Optimized Meeting Report"
+      },
+      "smart_mom": {
+        "participants": [
+          "Elena",
+          "Marcus",
+          "Kavita",
+          "David"
+        ],
+        "overview": "The meeting focused on addressing database query latency, redesigning the customer dashboard, and strengthening security migration strategies.",
+        "discussion_points": [
+          "Today, we need to address database query latency, the customer dashboard redesign, and the new or worth-to security migration",
+          "From the QA perspective, we reproduced the timeout on the staging environment under a simulated load of 2,000 concurrent requests",
+          "I will publish the updated API schema documentation to the developer portal by Thursday at 12 PM",
+          "Before we push the new dashboard to production, security must review the third-party charting libraries",
+          "I will draft the official customer migration announcement and publish it to the product blog by Friday at 4 PM"
+        ],
+        "decisions": [
+          "Database maintenance window was scheduled for Wednesday night at 11 PM.",
+          "Mandatory OAuth two authentication was implemented on production endpoints starting the first of next month."
+        ],
+        "action_items": [
+          {
+            "task": "Database index patches and connection pool optimization were added to the schedule.",
+            "person": "Speaker 1",
+            "deadline": "Wednesday at 3 PM",
+            "time": "01:00",
+            "notes": "[01:00] Speaker 1",
+            "confidence": 0.95
+          },
+          {
+            "task": "The API schema documentation was published to the developer portal.",
+            "person": "Speaker 4",
+            "deadline": "Thursday at 12 PM",
+            "time": "01:35",
+            "notes": "[01:35] Speaker 4",
+            "confidence": 0.95
+          },
+          {
+            "task": "Dashboard widget integration and front-end responsive testing were scheduled for next Monday at 5 PM.",
+            "person": "Speaker 3",
+            "deadline": "next Monday at 5 PM",
+            "time": "01:46",
+            "notes": "[01:46] Speaker 3",
+            "confidence": 0.8
+          },
+          {
+            "task": "Security vulnerability audit of third-party charting libraries was initiated.",
+            "person": "David",
+            "deadline": "front-end dependencies and share the remediation report by Friday at 2 PM",
+            "time": "02:11",
+            "notes": "[02:11] Speaker 2",
+            "confidence": 0.95
+          },
+          {
+            "task": "The official customer migration announcement and publication to the product blog was planned for Friday at 4 PM.",
+            "person": "David",
+            "deadline": "David shares the audit report",
+            "time": "02:11",
+            "notes": "[02:11] Speaker 2",
+            "confidence": 0.95
+          }
+        ],
+        "risks": [],
+        "next_steps": [],
+        "title": "Quarterly Platform Synchronization Meeting",
+        "active_model": "gemma3:1b"
+      }
+    },
+    "meeting_3": {
+      "name": "Meeting 3: Infrastructure Review (Unnamed)",
+      "type": "test set",
+      "duration_seconds": 323.11,
+      "asr_benchmarks": [
+        {
+          "model_size": "tiny",
+          "with_initial_prompt": false,
+          "label": "tiny (no prompt)",
+          "wer": 0.1032,
+          "median_latency_seconds": 10.2,
+          "median_cpu_percent": 359.7,
+          "median_ram_mb": 555.2,
+          "latencies_3_runs": [
+            10.13,
+            10.66,
+            10.2
+          ]
+        },
+        {
+          "model_size": "tiny",
+          "with_initial_prompt": true,
+          "label": "tiny (with prompt)",
+          "wer": 0.0914,
+          "median_latency_seconds": 10.31,
+          "median_cpu_percent": 362.1,
+          "median_ram_mb": 556.8,
+          "latencies_3_runs": [
+            10.53,
+            10.31,
+            10.24
+          ]
+        },
+        {
+          "model_size": "base",
+          "with_initial_prompt": false,
+          "label": "base (no prompt)",
+          "wer": 0.0558,
+          "median_latency_seconds": 19.9,
+          "median_cpu_percent": 376.8,
+          "median_ram_mb": 645.4,
+          "latencies_3_runs": [
+            19.9,
+            19.85,
+            20.35
+          ]
+        },
+        {
+          "model_size": "base",
+          "with_initial_prompt": true,
+          "label": "base (with prompt)",
+          "wer": 0.0643,
+          "median_latency_seconds": 20.04,
+          "median_cpu_percent": 376.9,
+          "median_ram_mb": 646.4,
+          "latencies_3_runs": [
+            19.74,
+            20.04,
+            21.8
+          ]
+        }
+      ],
+      "pipeline_latencies": {
+        "fast_mode_seconds": 22.99,
+        "smart_synthesis_seconds": 5.59,
+        "total_smart_seconds": 28.58
+      },
+      "speaker_attribution": {
+        "clustering_only_remap_true": {
+          "accuracy": 0.5811,
+          "macro_precision": 0.6555,
+          "macro_recall": 0.5804,
+          "macro_f1": 0.5916,
+          "micro_precision": 0.5811,
+          "micro_recall": 0.5811,
+          "micro_f1": 0.5811,
+          "weighted_precision": 0.67,
+          "weighted_recall": 0.5811,
+          "weighted_f1": 0.5968,
+          "labels": [
+            "Speaker 1",
+            "Speaker 2",
+            "Speaker 3",
+            "Speaker 4",
+            "Unknown"
+          ],
+          "confusion_matrix": [
+            [
+              87,
+              0,
+              44,
+              0,
+              12
+            ],
+            [
+              0,
+              115,
+              13,
+              0,
+              5
+            ],
+            [
+              0,
+              108,
+              52,
+              0,
+              6
+            ],
+            [
+              0,
+              0,
+              47,
+              95,
+              6
+            ],
+            [
+              0,
+              0,
+              30,
+              0,
+              27
+            ]
+          ]
+        },
+        "grounding_on": {
+          "accuracy": 0.2875,
+          "macro_precision": 0.2469,
+          "macro_recall": 0.3292,
+          "macro_f1": 0.2783,
+          "micro_precision": 0.2875,
+          "micro_recall": 0.2875,
+          "micro_f1": 0.2875,
+          "weighted_precision": 0.2008,
+          "weighted_recall": 0.2875,
+          "weighted_f1": 0.234,
+          "labels": [
+            "Speaker 1",
+            "Speaker 2",
+            "Speaker 3",
+            "Speaker 4",
+            "Unknown"
+          ],
+          "confusion_matrix": [
+            [
+              44,
+              0,
+              0,
+              87,
+              12
+            ],
+            [
+              13,
+              115,
+              0,
+              0,
+              5
+            ],
+            [
+              52,
+              108,
+              0,
+              0,
+              6
+            ],
+            [
+              47,
+              0,
+              95,
+              0,
+              6
+            ],
+            [
+              30,
+              0,
+              0,
+              0,
+              27
+            ]
+          ]
+        }
+      },
+      "action_items_evaluation": {
+        "fast_mode": {
+          "precision": 0.6,
+          "recall": 1.0,
+          "f1": 0.75,
+          "true_positives": 3,
+          "false_positives": 2,
+          "false_negatives": 0
+        },
+        "smart_mode": {
+          "precision": 0.6,
+          "recall": 1.0,
+          "f1": 0.75,
+          "true_positives": 3,
+          "false_positives": 2,
+          "false_negatives": 0
+        }
+      },
+      "summary_quality": {
+        "fast_key_moments": {
+          "rouge1": 0.2391,
+          "rouge2": 0.0659,
+          "rougeL": 0.1413,
+          "bleu": 0.0168,
+          "meteor": 0.2238,
+          "bertscore_f1": -0.0624,
+          "first_person_pronoun_count": 3,
+          "first_person_matches": [
+            "our",
+            "we",
+            "us"
+          ]
+        },
+        "smart_mom": {
+          "rouge1": 0.2963,
+          "rouge2": 0.1509,
+          "rougeL": 0.2037,
+          "bleu": 0.0291,
+          "meteor": 0.1933,
+          "bertscore_f1": 0.3324,
+          "first_person_pronoun_count": 0,
+          "first_person_matches": []
+        },
+        "fluency_proxy_perplexity": 24.0
+      },
+      "timestamp_error": {
+        "mae": 69.13,
+        "pairs_count": 4,
+        "mse": 6881.56,
+        "r2": 0.0,
+        "pearson_r": 1.0,
+        "spearman_rho": 1.0
+      },
+      "fast_mom": {
+        "participants": [
+          "Speaker 1",
+          "Speaker 2",
+          "Speaker 3",
+          "Speaker 4",
+          "Team"
+        ],
+        "meeting_date": null,
+        "discussion_points": [
+          "The root cause in the Kubernetes cluster appears to be improper CPU request limits on the payment processing pods",
+          "The mobile application engineering team already integrated the authorization code flow with PKCE on the staging build",
+          "However, the legacy backend proxy services lack the cryptographic verification filter needed to validate the code challenge",
+          "We need to switch Redis to volatile LRU and extend the Kafka heartbeat interval to 15 seconds to prevent spurious group rebalances",
+          "We will monitor the Kafka consumer lag metrics and Redis memory consumption in real time through our centralized Prometheus and Grafana dashboards once the changes land"
+        ],
+        "decisions": [
+          "[01:58] Speaker 4: We decide to scale the Kubernetes cluster replicas from 3 to 8 before the traffic surge",
+          "[02:53] Speaker 2: We decide to enforce strict OAuth 2.0 PKCE authentication across all external microservice gateways"
+        ],
+        "action_items": [
+          {
+            "task": "Refactor the Kubernetes deployment manifests and update the Helm charts",
+            "person": "Speaker 4",
+            "deadline": "Tuesday at 4 PM",
+            "time": "02:05",
+            "seg_id": "whisper-20",
+            "notes": "[02:05] Speaker 4",
+            "confidence": 0.95
+          },
+          {
+            "task": "Audit the OAuth 2.0 token expiration policies and publish the revised security spec",
+            "person": "Speaker 2",
+            "deadline": "Wednesday at 2 PM",
+            "time": "03:00",
+            "seg_id": "whisper-28",
+            "notes": "[03:00] Speaker 2",
+            "confidence": 0.95
+          },
+          {
+            "task": "Switch Redis to volatile LRU and extend the Kafka heartbeat interval to 15 seconds to prevent spurious group rebalances",
+            "person": "Team",
+            "deadline": "Unknown",
+            "time": "03:52",
+            "seg_id": "whisper-35",
+            "notes": "[03:52] Team",
+            "confidence": 0.7
+          },
+          {
+            "task": "Configure the Kafka consumer partition rebalancing and optimize Redis cache eviction thresholds",
+            "person": "Speaker 3",
+            "deadline": "Thursday at 5 PM",
+            "time": "04:01",
+            "seg_id": "whisper-36",
+            "notes": "[04:01] Speaker 3",
+            "confidence": 0.95
+          },
+          {
+            "task": "Schedule the production rollout window",
+            "person": "Speaker 2",
+            "deadline": "Unknown",
+            "time": "04:46",
+            "seg_id": "whisper-42",
+            "notes": "[04:46] Speaker 2",
+            "confidence": 0.7
+          }
+        ],
+        "cleaned_transcript": "Good morning everyone. Let us begin our platform architecture review. Today we are addressing infrastructure stability issues, specifically Kubernetes pod crash loops in production, OAuth 2.0 token expiration mismatches, and severe Kafka consumer lag during peak transaction hours. Looking at the monitoring dashboards from yesterday's stress testing, memory usage on the ingress gateway exceeded 92%. The ingress controllers failed health probes because traffic spiked during the flash sale event, causing cascading connection resets. That gateway failure also exposed a vulnerability in our authentication layer. Multiple API clients triggered concurrent token refresh requests. Because the Redis cluster was saturated, several microservices fell back to slow database queries, which completely exhausted our database connection pool. From the data streaming perspective, Kafka partition rebalancing took nearly four minutes to settle after the broker restart. Three consumer groups lost their partition offsets, leading to duplicate transaction processing in the ledger service. The root cause in the Kubernetes cluster appears to be improper CPU request limits on the payment processing pods. When burst traffic arrived, the Linux kernel throttled the containers, preventing timely keep-alive pings. We ran a replica scaling experiment on the staging environment this morning with synthetic traffic. Scaling the pod replicas from 3 to 8 maintained 99th percentile latency below 120 milliseconds, even under 3,000 concurrent requests per second. Approved We decide to scale the Kubernetes cluster replicas from 3 to 8 before the traffic surge. I will refactor the Kubernetes deployment manifests and update the Helm charts by Tuesday at 4 PM. Regarding authentication protocols, our legacy microservices are still accepting deprecated bearer tokens without cryptographically signed proof keys. This creates a security risk where stale access tokens can be replayed across different tenant boundaries. The mobile application engineering team already integrated the authorization code flow with PKCE on the staging build. However, the legacy backend proxy services lack the cryptographic verification filter needed to validate the code challenge. Approved, we decide to enforce strict OAuth 2.0 PKCE authentication across all external microservice gateways. I will audit the OAuth 2.0 token expiration policies and publish the revised security spec by Wednesday at 2 PM. On the messaging side, our Kafka brokers are currently configured with a default session time out of 45 seconds. When garbage collection pauses occur in our Java workers, the coordinator assumes the consumer died and triggers an expensive partition rebalance. Additionally, our Redis cache cluster is using an all-keys LRU eviction policy. When the session data spikes, critical static configuration keys are evicted prematurely, forcing unnecessary remote procedure calls. We need to switch Redis to volatile LRU and extend the Kafka heartbeat interval to 15 seconds to prevent spurious group rebalances. I will configure the Kafka consumer partition rebalancing and optimize Redis cache eviction thresholds by Thursday at 5 PM. Excellent. What is our rollback strategy if the new Helm charts fail during the staging deployment? The continuous integration pipeline maintains automated rollback hooks. If Prometheus reports an HTTP error rate exceeding 1% over a 3-minute window, our GoCD automatically reverts to the previous stable container image tag. That gives us confidence for staging validation. Once the security audit is published, we can schedule the production rollout window. We will monitor the Kafka consumer lag metrics and Redis memory consumption in real time through our centralized Prometheus and Grafana dashboards once the changes land. Agreed. To summarize our roadmap, Kubernetes scaling manifests are scheduled for Tuesday, or of 2.0 security policies for Wednesday and Kafka and Redis optimization for Thursday. Let us adjourn and execute.",
+        "overview": "Three consumer groups lost their partition offsets, leading to duplicate transaction processing in the ledger service The root cause in the Kubernetes cluster appears to be improper CPU. Request limits on the payment processing pods When burst traffic arrived, the Linux kernel throttled the containers, preventing timely keep-alive pings. We ran a replica scaling experiment on. The staging environment this morning with synthetic traffic Scaling the pod replicas from 3 to 8 maintained 99th percentile latency below 120 milliseconds, even under 3,000 concurrent requests. Per second. Approved We decide to scale the Kubernetes cluster replicas from 3 to 8 before the traffic surge. The mobile application engineering team already integrated the authorization.",
+        "next_steps": [
+          "Refactor the Kubernetes deployment manifests and update the Helm charts",
+          "Audit the OAuth 2.0 token expiration policies and publish the revised security spec",
+          "Switch Redis to volatile LRU and extend the Kafka heartbeat interval to 15 seconds to prevent spurious group rebalances",
+          "Configure the Kafka consumer partition rebalancing and optimize Redis cache eviction thresholds"
+        ],
+        "title": "VoxIntel Optimized Meeting Report"
+      },
+      "smart_mom": {
+        "participants": [
+          "Speaker 1",
+          "Speaker 2",
+          "Speaker 3",
+          "Speaker 4"
+        ],
+        "overview": "The team reviewed platform architecture updates, addressing critical issues related to Kubernetes pod crashes, OAuth 2.0 token expirations, Kafka consumer lag, and database performance.",
+        "discussion_points": [
+          "The root cause in the Kubernetes cluster appears to be improper CPU request limits on the payment processing pods",
+          "The mobile application engineering team already integrated the authorization code flow with PKCE on the staging build",
+          "However, the legacy backend proxy services lack the cryptographic verification filter needed to validate the code challenge",
+          "We need to switch Redis to volatile LRU and extend the Kafka heartbeat interval to 15 seconds to prevent spurious group rebalances",
+          "We will monitor the Kafka consumer lag metrics and Redis memory consumption in real time through our centralized Prometheus and Grafana dashboards once the changes land"
+        ],
+        "decisions": [
+          "The team scheduled the Kubernetes scaling manifests for Tuesday at 4 PM.",
+          "[02:53] Speaker 2: We decide to enforce strict OAuth 2.0 PKCE authentication across all external microservice gateways"
+        ],
+        "action_items": [
+          {
+            "task": "The team decided to refactor the Kubernetes deployment manifests and update the Helm charts.",
+            "person": "Speaker 4",
+            "deadline": "Tuesday at 4 PM",
+            "time": "02:05",
+            "notes": "[02:05] Speaker 4",
+            "confidence": 0.95
+          },
+          {
+            "task": "The team decided to audit the OAuth 2.0 token expiration policies.",
+            "person": "Speaker 2",
+            "deadline": "Wednesday at 2 PM",
+            "time": "03:00",
+            "notes": "[03:00] Speaker 2",
+            "confidence": 0.95
+          },
+          {
+            "task": "The team decided to configure the Kafka consumer partition rebalancing.",
+            "person": "Team",
+            "deadline": "Unknown",
+            "time": "03:52",
+            "notes": "[03:52] Team",
+            "confidence": 0.7
+          },
+          {
+            "task": "The team decided to monitor the Kafka consumer lag metrics.",
+            "person": "Speaker 3",
+            "deadline": "Thursday at 5 PM",
+            "time": "04:01",
+            "notes": "[04:01] Speaker 3",
+            "confidence": 0.95
+          },
+          {
+            "task": "The team decided to extend the Kafka heartbeat interval to 15 seconds.",
+            "person": "Speaker 2",
+            "deadline": "Unknown",
+            "time": "04:46",
+            "notes": "[04:46] Speaker 2",
+            "confidence": 0.7
+          }
+        ],
+        "risks": [],
+        "next_steps": [],
+        "title": "Platform Architecture Review Meeting Minutes",
+        "active_model": "gemma3:1b"
+      }
+    }
+  },
+  "pooled_action_items_evaluation": {
+    "pooled_positives": 11,
+    "status": "computed"
+  },
+  "pooled_timestamp_error": {
+    "mae": 34.71,
+    "pairs_count": 12,
+    "mse": 2894.43,
+    "r2": -0.3634,
+    "pearson_r": 0.7799,
+    "spearman_rho": 0.7098
+  }
+}

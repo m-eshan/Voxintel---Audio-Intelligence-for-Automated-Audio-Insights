@@ -163,6 +163,7 @@ def _transcribe_with_faster_whisper_segments(
     wav_path: Path,
     attendees: list[str] | None = None,
     initial_prompt: str | None = None,
+    model_size: str = "base",
 ) -> list[dict]:
     try:
         from faster_whisper import WhisperModel
@@ -172,7 +173,7 @@ def _transcribe_with_faster_whisper_segments(
         ) from exc
 
     try:
-        model = _get_faster_whisper_model()
+        model = _get_faster_whisper_model(model_size)
         prompt = _build_meeting_initial_prompt(attendees, initial_prompt)
         raw_segments, _ = model.transcribe(
             str(wav_path),
@@ -208,16 +209,14 @@ def _transcribe_with_faster_whisper_segments(
     return segments
 
 
-@lru_cache(maxsize=1)
-def _get_faster_whisper_model():
+@lru_cache(maxsize=4)
+def _get_faster_whisper_model(model_size: str = "base"):
     from faster_whisper import WhisperModel
 
-    for size in ("base", "tiny"):
-        try:
-            return WhisperModel(size, device="cpu", compute_type="int8", cpu_threads=4)
-        except Exception:
-            continue
-    return WhisperModel("tiny", device="cpu", compute_type="int8")
+    try:
+        return WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=4)
+    except Exception:
+        return WhisperModel("tiny", device="cpu", compute_type="int8")
 
 
 @lru_cache(maxsize=1)

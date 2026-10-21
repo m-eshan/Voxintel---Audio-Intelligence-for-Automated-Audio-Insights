@@ -1,0 +1,260 @@
+{
+  "meeting_id": "meeting_3_unnamed_test_set",
+  "audio_file": "test_meeting_3_unnamed.mp3",
+  "dataset_type": "test set",
+  "total_duration_seconds": 323.11,
+  "total_duration_minutes": 5.39,
+  "speakers": [
+    "Speaker 1",
+    "Speaker 2",
+    "Speaker 3",
+    "Speaker 4"
+  ],
+  "segments": [
+    {
+      "segment_id": "M3_01",
+      "turn_index": 1,
+      "speaker": "Speaker 1",
+      "voice": "en-US-GuyNeural",
+      "start": 1.0,
+      "end": 20.51,
+      "duration": 19.51,
+      "text": "Good morning everyone. Let us begin our platform architecture review. Today we are addressing infrastructure stability issues, specifically Kubernetes pod crash loops in production, OAuth 2.0 token expiration mismatches, and severe Kafka consumer lag during peak transaction hours."
+    },
+    {
+      "segment_id": "M3_02",
+      "turn_index": 2,
+      "speaker": "Speaker 3",
+      "voice": "en-US-JennyNeural",
+      "start": 21.81,
+      "end": 38.8,
+      "duration": 16.99,
+      "text": "Looking at the monitoring dashboards from yesterday's stress testing, memory usage on the ingress gateway exceeded ninety-two percent. The ingress controllers failed health probes because traffic spiked during the flash sale event, causing cascading connection resets."
+    },
+    {
+      "segment_id": "M3_03",
+      "turn_index": 3,
+      "speaker": "Speaker 2",
+      "voice": "en-GB-SoniaNeural",
+      "start": 40.1,
+      "end": 60.89,
+      "duration": 20.78,
+      "text": "That gateway failure also exposed a vulnerability in our authentication layer. Multiple API clients triggered concurrent token refresh requests. Because the redis cluster was saturated, several microservices fell back to slow database queries, which completely exhausted our database connection pool."
+    },
+    {
+      "segment_id": "M3_04",
+      "turn_index": 4,
+      "speaker": "Speaker 4",
+      "voice": "en-IN-PrabhatNeural",
+      "start": 62.19,
+      "end": 80.6,
+      "duration": 18.41,
+      "text": "From the data streaming perspective, Kafka partition rebalancing took nearly four minutes to settle after the broker restart. Three consumer groups lost their partition offsets, leading to duplicate transaction processing in the ledger service."
+    },
+    {
+      "segment_id": "M3_05",
+      "turn_index": 5,
+      "speaker": "Speaker 1",
+      "voice": "en-US-GuyNeural",
+      "start": 81.9,
+      "end": 96.27,
+      "duration": 14.38,
+      "text": "The root cause in the Kubernetes cluster appears to be improper CPU request limits on the payment processing pods. When burst traffic arrived, the Linux kernel throttled the containers, preventing timely keepalive pings."
+    },
+    {
+      "segment_id": "M3_06",
+      "turn_index": 6,
+      "speaker": "Speaker 3",
+      "voice": "en-US-JennyNeural",
+      "start": 97.57,
+      "end": 115.31,
+      "duration": 17.74,
+      "text": "We ran a replica scaling experiment on the staging environment this morning with synthetic traffic. Scaling the pod replicas from three to eight maintained ninety-ninth percentile latency below one hundred and twenty milliseconds, even under three thousand concurrent requests per second."
+    },
+    {
+      "segment_id": "M3_07",
+      "turn_index": 7,
+      "speaker": "Speaker 1",
+      "voice": "en-US-GuyNeural",
+      "start": 116.61,
+      "end": 124.43,
+      "duration": 7.82,
+      "text": "Approved. We decide to scale the Kubernetes cluster replicas from three to eight before the traffic surge."
+    },
+    {
+      "segment_id": "M3_08",
+      "turn_index": 8,
+      "speaker": "Speaker 1",
+      "voice": "en-US-GuyNeural",
+      "start": 125.73,
+      "end": 132.64,
+      "duration": 6.91,
+      "text": "I will refactor the Kubernetes deployment manifests and update the Helm charts by Tuesday at 4 PM."
+    },
+    {
+      "segment_id": "M3_09",
+      "turn_index": 9,
+      "speaker": "Speaker 2",
+      "voice": "en-GB-SoniaNeural",
+      "start": 133.94,
+      "end": 151.01,
+      "duration": 17.06,
+      "text": "Regarding authentication protocols, our legacy microservices are still accepting deprecated bearer tokens without cryptographically signed proof keys. This creates a security risk where stale access tokens can be replayed across different tenant boundaries."
+    },
+    {
+      "segment_id": "M3_10",
+      "turn_index": 10,
+      "speaker": "Speaker 3",
+      "voice": "en-US-JennyNeural",
+      "start": 152.31,
+      "end": 168.68,
+      "duration": 16.37,
+      "text": "The mobile application engineering team already integrated the authorization code flow with PKCE on the staging build. However, the legacy backend proxy services lack the cryptographic verification filter needed to validate the code challenge."
+    },
+    {
+      "segment_id": "M3_11",
+      "turn_index": 11,
+      "speaker": "Speaker 2",
+      "voice": "en-GB-SoniaNeural",
+      "start": 169.98,
+      "end": 179.53,
+      "duration": 9.55,
+      "text": "Approved. We decide to enforce strict OAuth 2.0 PKCE authentication across all external microservice gateways."
+    },
+    {
+      "segment_id": "M3_12",
+      "turn_index": 12,
+      "speaker": "Speaker 2",
+      "voice": "en-GB-SoniaNeural",
+      "start": 180.83,
+      "end": 189.56,
+      "duration": 8.74,
+      "text": "I will audit the OAuth 2.0 token expiration policies and publish the revised security spec by Wednesday at 2 PM."
+    },
+    {
+      "segment_id": "M3_13",
+      "turn_index": 13,
+      "speaker": "Speaker 4",
+      "voice": "en-IN-PrabhatNeural",
+      "start": 190.86,
+      "end": 211.31,
+      "duration": 20.45,
+      "text": "On the messaging side, our Kafka brokers are currently configured with a default session timeout of forty-five seconds. When garbage collection pauses occur in our Java workers, the coordinator assumes the consumer died and triggers an expensive partition rebalance."
+    },
+    {
+      "segment_id": "M3_14",
+      "turn_index": 14,
+      "speaker": "Speaker 3",
+      "voice": "en-US-JennyNeural",
+      "start": 212.61,
+      "end": 228.19,
+      "duration": 15.58,
+      "text": "Additionally, our Redis cache cluster is using an all-keys LRU eviction policy. When the session data spikes, critical static configuration keys are evicted prematurely, forcing unnecessary remote procedure calls."
+    },
+    {
+      "segment_id": "M3_15",
+      "turn_index": 15,
+      "speaker": "Speaker 4",
+      "voice": "en-IN-PrabhatNeural",
+      "start": 229.49,
+      "end": 240.19,
+      "duration": 10.7,
+      "text": "We need to switch Redis to volatile LRU and extend the Kafka heartbeat interval to fifteen seconds to prevent spurious group rebalances."
+    },
+    {
+      "segment_id": "M3_16",
+      "turn_index": 16,
+      "speaker": "Speaker 4",
+      "voice": "en-IN-PrabhatNeural",
+      "start": 241.49,
+      "end": 252.29,
+      "duration": 10.8,
+      "text": "I will configure the Kafka consumer partition rebalancing and optimize Redis cache eviction thresholds by Thursday at 5 PM."
+    },
+    {
+      "segment_id": "M3_17",
+      "turn_index": 17,
+      "speaker": "Speaker 1",
+      "voice": "en-US-GuyNeural",
+      "start": 253.59,
+      "end": 260.98,
+      "duration": 7.39,
+      "text": "Excellent. What is our rollback strategy if the new Helm charts fail during the staging deployment?"
+    },
+    {
+      "segment_id": "M3_18",
+      "turn_index": 18,
+      "speaker": "Speaker 3",
+      "voice": "en-US-JennyNeural",
+      "start": 262.28,
+      "end": 278.92,
+      "duration": 16.63,
+      "text": "The continuous integration pipeline maintains automated rollback hooks. If Prometheus reports an HTTP error rate exceeding one percent over a three-minute window, ArgoCD automatically reverts to the previous stable container image tag."
+    },
+    {
+      "segment_id": "M3_19",
+      "turn_index": 19,
+      "speaker": "Speaker 2",
+      "voice": "en-GB-SoniaNeural",
+      "start": 280.22,
+      "end": 289.53,
+      "duration": 9.31,
+      "text": "That gives us confidence for staging validation. Once the security audit is published, we can schedule the production rollout window."
+    },
+    {
+      "segment_id": "M3_20",
+      "turn_index": 20,
+      "speaker": "Speaker 4",
+      "voice": "en-IN-PrabhatNeural",
+      "start": 290.83,
+      "end": 303.91,
+      "duration": 13.08,
+      "text": "We will monitor the Kafka consumer lag metrics and Redis memory consumption in real time through our centralized Prometheus and Grafana dashboards once the changes land."
+    },
+    {
+      "segment_id": "M3_21",
+      "turn_index": 21,
+      "speaker": "Speaker 1",
+      "voice": "en-US-GuyNeural",
+      "start": 305.21,
+      "end": 320.81,
+      "duration": 15.6,
+      "text": "Agreed. To summarize our roadmap: Kubernetes scaling manifests are scheduled for Tuesday, OAuth 2.0 security policies for Wednesday, and Kafka and Redis optimization for Thursday. Let us adjourn and execute."
+    }
+  ],
+  "reference_summary": "The engineering team reviewed infrastructure bottlenecks, focusing on Kubernetes cluster stability, OAuth 2.0 security protocols, Kafka consumer lag, and Redis caching. Two primary decisions were established: scaling Kubernetes pod replicas from three to eight and mandating OAuth 2.0 PKCE across external microservice gateways. Three commitments were confirmed: updating Helm deployment manifests by Tuesday at 4 PM, publishing the revised token expiration spec by Wednesday at 2 PM, and tuning Kafka partition rebalancing alongside Redis cache thresholds by Thursday at 5 PM.",
+  "ground_truth_mom": {
+    "decisions": [
+      {
+        "speaker": "Speaker 1",
+        "decision": "Scale the Kubernetes cluster replicas from three to eight before the traffic surge",
+        "turn": 7
+      },
+      {
+        "speaker": "Speaker 2",
+        "decision": "Enforce strict OAuth 2.0 PKCE authentication across all external microservice gateways",
+        "turn": 11
+      }
+    ],
+    "action_items": [
+      {
+        "speaker": "Speaker 1",
+        "task": "Refactor the Kubernetes deployment manifests and update the Helm charts",
+        "deadline": "Tuesday at 4 PM",
+        "turn": 8
+      },
+      {
+        "speaker": "Speaker 2",
+        "task": "Audit the OAuth 2.0 token expiration policies and publish the revised security spec",
+        "deadline": "Wednesday at 2 PM",
+        "turn": 12
+      },
+      {
+        "speaker": "Speaker 4",
+        "task": "Configure the Kafka consumer partition rebalancing and optimize Redis cache eviction thresholds",
+        "deadline": "Thursday at 5 PM",
+        "turn": 16
+      }
+    ]
+  }
+}
